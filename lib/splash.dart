@@ -25,7 +25,6 @@ class _SplashState extends State<Splash> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
       body: Center(
         child: Image.asset(
           'assets/images/badean_splash.png',
