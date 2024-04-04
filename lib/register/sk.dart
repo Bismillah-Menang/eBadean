@@ -9,7 +9,9 @@ class SyarkenPageState extends State<Syarken> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+      ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(20.0),
         child: Column(
@@ -31,7 +33,7 @@ class SyarkenPageState extends State<Syarken> {
                     fontSize: 12.0,
                     color: Color(0xFF6A6A6B),
                     fontFamily: 'Poppins'),
-                    textAlign: TextAlign.justify,
+                textAlign: TextAlign.justify,
               ),
             ),
             SizedBox(height: 10.0),
@@ -43,7 +45,55 @@ class SyarkenPageState extends State<Syarken> {
                     fontSize: 12.0,
                     color: Color(0xFF6A6A6B),
                     fontFamily: 'Poppins'),
-                    textAlign: TextAlign.justify,
+                textAlign: TextAlign.justify,
+              ),
+            ),
+            SizedBox(height: 10.0),
+            Padding(
+              padding: EdgeInsets.only(bottom: 20.0),
+              child: Text(
+                'I. Definisi dan Lingkup',
+                style: TextStyle(
+                    fontSize: 14.0,
+                    color: Colors.black,
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.bold),
+                textAlign: TextAlign.justify,
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(bottom: 20.0),
+              child: Text(
+                'Aplikasi e-Badean adalah platform digital yang bertujuan untuk menyediakan layanan surat menyurat secara elektronik kepada masyarakat Kabupaten Bondowoso. Lingkup layanan termasuk, namun tidak terbatas pada, pengiriman surat, pendaftaran dokumen, dan transaksi administrasi lainnya yang berkaitan dengan kebutuhan surat menyurat di wilayah tersebut.',
+                style: TextStyle(
+                    fontSize: 12.0,
+                    color: Color(0xFF6A6A6B),
+                    fontFamily: 'Poppins'),
+                textAlign: TextAlign.justify,
+              ),
+            ),
+            SizedBox(height: 10.0),
+            Padding(
+              padding: EdgeInsets.only(bottom: 20.0),
+              child: Text(
+                'II. Penggunaan Aplikasi',
+                style: TextStyle(
+                    fontSize: 14.0,
+                    color: Colors.black,
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.bold),
+                textAlign: TextAlign.justify,
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(bottom: 20.0),
+              child: Text(
+                'Pengguna wajib memiliki akses internet dan perangkat yang memadai untuk mengoperasikan aplikasi ini. Pendaftaran akun diperlukan untuk mengakses seluruh fitur dan layanan yang disediakan dalam aplikasi. Informasi yang diberikan oleh pengguna selama proses pendaftaran haruslah akurat, lengkap, dan mutakhir. Keamanan dan Privasi',
+                style: TextStyle(
+                    fontSize: 12.0,
+                    color: Color(0xFF6A6A6B),
+                    fontFamily: 'Poppins'),
+                textAlign: TextAlign.justify,
               ),
             ),
             SizedBox(height: 10.0),
