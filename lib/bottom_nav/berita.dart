@@ -34,18 +34,18 @@ class _BeritaState extends State<Berita> {
               Container(
                 height: 40.0,
                 decoration: BoxDecoration(
-                  color: Color(0xFFEBF0FF),
+                  color: Color(0xFFEEEDF3),
                   borderRadius: BorderRadius.circular(20.0),
                 ),
                 child: TextField(
                   decoration: InputDecoration(
                     hintText: 'Cari Berita',
                     hintStyle: TextStyle(
-                        color: Colors.grey[700], fontFamily: 'Poppins'),
+                        color: Colors.grey[700], fontFamily: 'Poppins', fontSize: 14),
                     border: InputBorder.none,
                     contentPadding: EdgeInsets.symmetric(
                       horizontal: 15.0,
-                      vertical: 11.0,
+                      vertical: 13.5,
                     ),
                     prefixIcon: Icon(Icons.search),
                   ),

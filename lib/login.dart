@@ -1,5 +1,6 @@
 import 'package:e_badean/bottom_nav/bottom_nav.dart';
 import 'package:e_badean/lupas.dart';
+import 'package:e_badean/register/fullname.dart';
 import 'package:flutter/material.dart';
 
 class Login extends StatefulWidget {
@@ -14,7 +15,7 @@ class LoginPageState extends State<Login> {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         body: SingleChildScrollView(
-          physics: const NeverScrollableScrollPhysics(),
+          physics: NeverScrollableScrollPhysics(),
           padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 105.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -196,18 +197,30 @@ class LoginPageState extends State<Login> {
               ),
               SizedBox(height: 70.0),
               Divider(),
-              Center(
-                child: TextButton(
-                  onPressed: () {},
-                  child: Text(
-                    'Belum punya akun? Daftar disini',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      color: Color(0xFF1548AD),
-                      fontSize: 12,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text("Belum punya akun?",
+                      style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.black,
+                          fontFamily: 'Poppins')),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => Fullname()),
+                      );
+                    },
+                    child: Text(
+                      "Daftar di sini",
+                      style: TextStyle(
+                          color: Color(0xFF1548AD),
+                          fontFamily: 'Poppins',
+                          fontSize: 12),
                     ),
-                  ),
-                ),
+                  )
+                ],
               ),
             ],
           ),

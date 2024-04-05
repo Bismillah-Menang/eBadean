@@ -1,4 +1,3 @@
-import 'package:e_badean/register/fullname.dart';
 import 'package:flutter/material.dart';
 
 class Lupas extends StatefulWidget {
@@ -64,12 +63,7 @@ class LupasPageState extends State<Lupas> {
             SizedBox(height: 20.0),
             Center(
               child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => Fullname()),
-                  );
-                },
+                onPressed: () {},
                 child: Text(
                   "Send",
                   style: TextStyle(

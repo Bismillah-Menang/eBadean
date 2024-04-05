@@ -13,6 +13,7 @@ class SyarkenPageState extends State<Syarken> {
         backgroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
+        physics: ClampingScrollPhysics(),
         padding: EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -88,7 +89,127 @@ class SyarkenPageState extends State<Syarken> {
             Padding(
               padding: EdgeInsets.only(bottom: 20.0),
               child: Text(
-                'Pengguna wajib memiliki akses internet dan perangkat yang memadai untuk mengoperasikan aplikasi ini. Pendaftaran akun diperlukan untuk mengakses seluruh fitur dan layanan yang disediakan dalam aplikasi. Informasi yang diberikan oleh pengguna selama proses pendaftaran haruslah akurat, lengkap, dan mutakhir. Keamanan dan Privasi',
+                'Pengguna wajib memiliki akses internet dan perangkat yang memadai untuk mengoperasikan aplikasi ini. Pendaftaran akun diperlukan untuk mengakses seluruh fitur dan layanan yang disediakan dalam aplikasi. Informasi yang diberikan oleh pengguna selama proses pendaftaran haruslah akurat, lengkap, dan mutakhir.',
+                style: TextStyle(
+                    fontSize: 12.0,
+                    color: Color(0xFF6A6A6B),
+                    fontFamily: 'Poppins'),
+                textAlign: TextAlign.justify,
+              ),
+            ),
+            SizedBox(height: 10.0),
+            Padding(
+              padding: EdgeInsets.only(bottom: 20.0),
+              child: Text(
+                'III. Keamanan dan Privasi',
+                style: TextStyle(
+                    fontSize: 14.0,
+                    color: Colors.black,
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.bold),
+                textAlign: TextAlign.justify,
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(bottom: 20.0),
+              child: Text(
+                'Pengguna bertanggung jawab atas keamanan dan kerahasiaan akun mereka sendiri. Tidak diperkenankan untuk memberikan informasi akun kepada pihak lain yang tidak berwenang. Aplikasi e-Badean tidak bertanggung jawab atas kerugian atau pelanggaran privasi yang timbul akibat kelalaian atau tindakan tidak aman dari pengguna.',
+                style: TextStyle(
+                    fontSize: 12.0,
+                    color: Color(0xFF6A6A6B),
+                    fontFamily: 'Poppins'),
+                textAlign: TextAlign.justify,
+              ),
+            ),
+            SizedBox(height: 10.0),
+            Padding(
+              padding: EdgeInsets.only(bottom: 20.0),
+              child: Text(
+                'IV. Pengiriman Surat dan Transaksi',
+                style: TextStyle(
+                    fontSize: 14.0,
+                    color: Colors.black,
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.bold),
+                textAlign: TextAlign.justify,
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(bottom: 20.0),
+              child: Text(
+                'Pengguna diwajibkan untuk mengisi formulir dengan informasi yang akurat untuk setiap surat atau transaksi yang akan dilakukan melalui aplikasi. Aplikasi e-Badean tidak bertanggung jawab atas kesalahan atau ketidakakuratan informasi yang disediakan oleh pengguna selama proses pengiriman surat atau transaksi.',
+                style: TextStyle(
+                    fontSize: 12.0,
+                    color: Color(0xFF6A6A6B),
+                    fontFamily: 'Poppins'),
+                textAlign: TextAlign.justify,
+              ),
+            ),
+            SizedBox(height: 10.0),
+            Padding(
+              padding: EdgeInsets.only(bottom: 20.0),
+              child: Text(
+                'V. Ketentuan Umum',
+                style: TextStyle(
+                    fontSize: 14.0,
+                    color: Colors.black,
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.bold),
+                textAlign: TextAlign.justify,
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(bottom: 20.0),
+              child: Text(
+                'Aplikasi e-Badean berhak untuk mengubah atau memperbarui syarat dan ketentuan tanpa pemberitahuan sebelumnya. Pengguna dianggap menyetujui perubahan tersebut dengan melanjutkan penggunaan aplikasi setelah perubahan syarat dan ketentuan tersebut diberlakukan.',
+                style: TextStyle(
+                    fontSize: 12.0,
+                    color: Color(0xFF6A6A6B),
+                    fontFamily: 'Poppins'),
+                textAlign: TextAlign.justify,
+              ),
+            ),
+            SizedBox(height: 10.0),
+            Padding(
+              padding: EdgeInsets.only(bottom: 20.0),
+              child: Text(
+                'VI. Penutup',
+                style: TextStyle(
+                    fontSize: 14.0,
+                    color: Colors.black,
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.bold),
+                textAlign: TextAlign.justify,
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(bottom: 20.0),
+              child: Text(
+                'Aplikasi e-Badean berhak untuk menutup akun pengguna yang melanggar syarat dan ketentuan yang telah ditetapkan. Aplikasi e-Badean juga berhak untuk menonaktifkan layanan jika terjadi pelanggaran atau kegiatan yang tidak sah yang dilakukan oleh pengguna.',
+                style: TextStyle(
+                    fontSize: 12.0,
+                    color: Color(0xFF6A6A6B),
+                    fontFamily: 'Poppins'),
+                textAlign: TextAlign.justify,
+              ),
+            ),
+            SizedBox(height: 10.0),
+            Padding(
+              padding: EdgeInsets.only(bottom: 20.0),
+              child: Text(
+                'Kontak',
+                style: TextStyle(
+                    fontSize: 14.0,
+                    color: Colors.black,
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.bold),
+                textAlign: TextAlign.justify,
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(bottom: 20.0),
+              child: Text(
+                'Untuk informasi lebih lanjut atau pertanyaan terkait dengan syarat dan ketentuan, pengguna dapat menghubungi tim dukungan pelanggan melalui informasi yang disediakan dalam aplikasi.',
                 style: TextStyle(
                     fontSize: 12.0,
                     color: Color(0xFF6A6A6B),

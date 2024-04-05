@@ -73,7 +73,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
                       label: "Berita",
                     ),
                     BottomNavigationBarItem(
-                      icon: Icon(Icons.supervised_user_circle),
+                      icon: Icon(Icons.sticky_note_2),
                       label: "Layanan",
                     ),
                     BottomNavigationBarItem(

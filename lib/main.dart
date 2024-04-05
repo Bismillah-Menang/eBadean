@@ -1,5 +1,6 @@
 import 'package:e_badean/bottom_nav/bottom_nav.dart';
 import 'package:e_badean/login.dart';
+import 'package:e_badean/register/fullname.dart';
 import 'package:e_badean/splash.dart';
 import 'package:flutter/material.dart';
 
@@ -25,6 +26,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => Splash(),
+        '/daftar': (context) => Fullname(),
         '/login': (context) => Login(),
         '/bottomnav': (context) => BottomNavBar(),
       },
