@@ -1,7 +1,10 @@
-import 'package:e_badean/bottom_nav/bottom_nav.dart';
-import 'package:e_badean/lupas.dart';
-import 'package:e_badean/register/fullname.dart';
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'bottom_nav/bottom_nav.dart';
+import 'register/fullname.dart';
+import 'lupas.dart';
 
 class Login extends StatefulWidget {
   @override
@@ -9,6 +12,85 @@ class Login extends StatefulWidget {
 }
 
 class LoginPageState extends State<Login> {
+  bool _isPasswordVisible = true;
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+
+  Future<void> _login() async {
+    String email = emailController.text;
+    String password = passwordController.text;
+
+    String url = "http://127.0.0.1:8000/api/login";
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        body: {
+          'email': email,
+          'password': password,
+        },
+      );
+
+      final responseData = json.decode(response.body);
+
+      if (response.statusCode == 200) {
+        if (responseData['status'] == true) {
+          String token = responseData['token'];
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setString('token', token);
+
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Text("Login Berhasil"),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => BottomNavBar()),
+                    );
+                  },
+                  child: Text('OK'),
+                ),
+              ],
+            ),
+          );
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => BottomNavBar()),
+          );
+        } else {
+          _showErrorDialog(responseData['message']);
+        }
+      } else {
+        print("HTTP Error ${response.statusCode}: ${response.reasonPhrase}");
+      }
+    } catch (error) {
+      print("Error: $error");
+      _showErrorDialog("Terjadi kesalahan. Silakan coba lagi.");
+    }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Login Gagal"),
+        content: Text(message),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -16,7 +98,7 @@ class LoginPageState extends State<Login> {
       home: Scaffold(
         body: SingleChildScrollView(
           physics: NeverScrollableScrollPhysics(),
-          padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 105.0),
+          padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 105.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -47,8 +129,9 @@ class LoginPageState extends State<Login> {
                   SizedBox(
                     height: 50.0,
                     child: TextFormField(
+                      controller: emailController,
                       decoration: InputDecoration(
-                        labelText: 'Username',
+                        labelText: 'Email',
                         labelStyle: TextStyle(fontSize: 14.0),
                         prefixIcon: Icon(Icons.person),
                         border: OutlineInputBorder(
@@ -68,15 +151,24 @@ class LoginPageState extends State<Login> {
                   SizedBox(
                     height: 50.0,
                     child: TextFormField(
+                      controller: passwordController,
                       textAlignVertical: TextAlignVertical.center,
-                      obscureText: true,
+                      obscureText: _isPasswordVisible,
                       decoration: InputDecoration(
                         labelText: 'Password',
                         labelStyle: TextStyle(fontSize: 14.0),
                         prefixIcon: Icon(Icons.key),
                         suffixIcon: IconButton(
-                          icon: Icon(Icons.visibility),
-                          onPressed: () {},
+                          onPressed: () {
+                            setState(() {
+                              _isPasswordVisible = !_isPasswordVisible;
+                            });
+                          },
+                          icon: Icon(
+                            _isPasswordVisible
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                          ),
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -96,12 +188,7 @@ class LoginPageState extends State<Login> {
               SizedBox(height: 20.0),
               Center(
                 child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => BottomNavBar()),
-                    );
-                  },
+                  onPressed: _login,
                   child: Text(
                     "Login",
                     style: TextStyle(

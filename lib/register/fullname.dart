@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:e_badean/register/username.dart';
 import 'package:flutter/material.dart';
 
@@ -7,12 +9,59 @@ class Fullname extends StatefulWidget {
 }
 
 class FullnamePageState extends State<Fullname> {
+  TextEditingController fullnameController = TextEditingController();
+
+  Future<void> _register(BuildContext context, String fullname) async {
+    String url = "http://127.0.0.1:8000/api/register";
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        body: {
+          'fullname': fullname,
+        },
+      );
+
+      print("Response: ${response.body}"); 
+
+      final responseData = json.decode(response.body);
+
+      if (responseData['status'] == false) {
+        if (responseData['message'] == "Validation error") {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => Username(fullname: fullname)),
+          );
+        } else {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Text("Registrasi Gagal"),
+              content: Text(responseData['message']),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('OK'),
+                ),
+              ],
+            ),
+          );
+        }
+      }
+    } catch (error) {
+      print("Error: $error");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(20.0),
+        physics: NeverScrollableScrollPhysics(),
+        padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
@@ -28,8 +77,8 @@ class FullnamePageState extends State<Fullname> {
             SizedBox(
               height: 50.0,
               child: TextFormField(
+                controller: fullnameController,
                 textAlignVertical: TextAlignVertical.center,
-                obscureText: true,
                 decoration: InputDecoration(
                   labelText: 'Masukkan Nama Lengkap',
                   labelStyle: TextStyle(fontSize: 14.0),
@@ -51,10 +100,7 @@ class FullnamePageState extends State<Fullname> {
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => Username()),
-                  );
+                  _register(context, fullnameController.text);
                 },
                 child: Text(
                   "Next",
@@ -68,13 +114,13 @@ class FullnamePageState extends State<Fullname> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  padding: EdgeInsets.symmetric(vertical: 10),
+                  padding: EdgeInsets.symmetric(vertical: 15),
                   backgroundColor: Color(0xFF1548AD),
                   minimumSize: Size(double.infinity, 0),
                 ),
               ),
             ),
-            SizedBox(height: 473.0),
+            SizedBox(height: 473.0), // Ganti dengan nilai yang sesuai
             Divider(),
           ],
         ),

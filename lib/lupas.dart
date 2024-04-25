@@ -11,7 +11,7 @@ class LupasPageState extends State<Lupas> {
     return Scaffold(
       appBar: AppBar(),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(20.0),
+        padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
@@ -76,7 +76,7 @@ class LupasPageState extends State<Lupas> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  padding: EdgeInsets.symmetric(vertical: 10),
+                  padding: EdgeInsets.symmetric(vertical: 15),
                   backgroundColor: Color(0xFF1548AD),
                   minimumSize: Size(double.infinity, 0),
                 ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:e_badean/bottom_nav/bottom_nav.dart';
 
 class Syarken extends StatefulWidget {
   @override
@@ -221,10 +222,24 @@ class SyarkenPageState extends State<Syarken> {
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(builder: (context) => Fullname()),
-                  // );
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Text("Registrasi Berhasil"),
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => BottomNavBar()),
+                            );
+                          },
+                          child: Text('OK'),
+                        ),
+                      ],
+                    ),
+                  );
                 },
                 child: Text(
                   "Register",

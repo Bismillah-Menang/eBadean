@@ -1,18 +1,66 @@
+import 'dart:convert';
 import 'package:e_badean/register/sk.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 
 class Password extends StatefulWidget {
+  final String fullname;
+  final String username;
+  final String email;
+  Password({required this.fullname, required this.username, required this.email});
+
   @override
   PasswordPageState createState() => PasswordPageState();
 }
 
 class PasswordPageState extends State<Password> {
+  bool _isPasswordVisible = true;
+  TextEditingController passController = TextEditingController();
+
+  Future<void> _register(BuildContext context, String fullname, String username, String email, String password) async {
+    String url = "http://127.0.0.1:8000/api/register";
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        body: {
+          'fullname': fullname,
+          'username': username,
+          'email': email,
+          'password': password,
+        },
+      );
+
+      if (response.statusCode == 201) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => Syarken()),
+        );
+      } else {
+        final responseData = json.decode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(responseData['message']),
+          ),
+        );
+      }
+    } catch (error) {
+      print("Error: $error");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Terjadi kesalahan. Silakan coba lagi nanti.'),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(20.0),
+        physics: NeverScrollableScrollPhysics(),
+         padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
@@ -28,15 +76,24 @@ class PasswordPageState extends State<Password> {
             SizedBox(
               height: 50.0,
               child: TextFormField(
+                controller: passController,
                 textAlignVertical: TextAlignVertical.center,
-                obscureText: true,
+                obscureText: _isPasswordVisible,
                 decoration: InputDecoration(
                   labelText: 'Masukkan Password',
                   labelStyle: TextStyle(fontSize: 14.0),
                   prefixIcon: Icon(Icons.key),
                   suffixIcon: IconButton(
-                    icon: Icon(Icons.visibility),
-                    onPressed: () {},
+                    onPressed: () {
+                      setState(() {
+                        _isPasswordVisible = !_isPasswordVisible;
+                      });
+                    },
+                    icon: Icon(
+                      _isPasswordVisible
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                    ),
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -65,10 +122,8 @@ class PasswordPageState extends State<Password> {
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => Syarken()),
-                  );
+                  _register(context, widget.fullname, widget.username,
+                      widget.email, passController.text);
                 },
                 child: Text(
                   "Next",
@@ -82,13 +137,13 @@ class PasswordPageState extends State<Password> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  padding: EdgeInsets.symmetric(vertical: 10),
+                  padding: EdgeInsets.symmetric(vertical: 15),
                   backgroundColor: Color(0xFF1548AD),
                   minimumSize: Size(double.infinity, 0),
                 ),
               ),
             ),
-            SizedBox(height: 420.0),
+            SizedBox(height: 420.0), 
             Divider(),
           ],
         ),
