@@ -15,11 +15,74 @@ class LoginPageState extends State<Login> {
   bool _isPasswordVisible = true;
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+  double emailTextFieldHeight = 50.0;
+  double passwordTextFieldHeight = 50.0;
 
   Future<void> _login() async {
     String email = emailController.text;
     String password = passwordController.text;
 
+    // Validasi jika email atau password kosong
+    if (email.isEmpty || password.isEmpty) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text("Login Gagal"),
+          content: Text("Harap isikan email dan password"),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('OK'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    // Validasi email
+    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text("Login Gagal"),
+          content: Text("Harap masukkan email yang valid"),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('OK'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    // Validasi password
+    if (password.length < 6 || password.length > 8) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text("Login Gagal"),
+          content: Text("Password harus terdiri dari 6-8 karakter"),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('OK'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    // Lanjutkan dengan proses login jika semua validasi terpenuhi
     String url = "http://127.0.0.1:8000/api/login";
 
     try {
@@ -31,10 +94,26 @@ class LoginPageState extends State<Login> {
         },
       );
 
+      print("Response: ${response.body}");
+
       final responseData = json.decode(response.body);
 
-      if (response.statusCode == 200) {
-        if (responseData['status'] == true) {
+      if (response.statusCode == 401) {
+        if (responseData['status'] == false) {
+          if (responseData['message'] == "validation error") {
+            if (responseData['errors'] != null) {
+              if (responseData['errors']['email'] != null) {
+                _showErrorDialog(responseData['errors']['email'][0]);
+              }
+              if (responseData['errors']['password'] != null) {
+                _showErrorDialog(responseData['errors']['password'][0]);
+              }
+            }
+          } else if (responseData['message'] ==
+              "Email & Password does not match with our record.") {
+            _showErrorDialog("Email dan password tidak sesuai!");
+          }
+        } else {
           String token = responseData['token'];
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setString('token', token);
@@ -61,8 +140,6 @@ class LoginPageState extends State<Login> {
             context,
             MaterialPageRoute(builder: (context) => BottomNavBar()),
           );
-        } else {
-          _showErrorDialog(responseData['message']);
         }
       } else {
         print("HTTP Error ${response.statusCode}: ${response.reasonPhrase}");
@@ -129,10 +206,10 @@ class LoginPageState extends State<Login> {
                   SizedBox(
                     height: 50.0,
                     child: TextFormField(
+                      cursorColor: Color(0xFF1548AD),
                       controller: emailController,
                       decoration: InputDecoration(
                         labelText: 'Email',
-                        labelStyle: TextStyle(fontSize: 14.0),
                         prefixIcon: Icon(Icons.person),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -152,6 +229,7 @@ class LoginPageState extends State<Login> {
                     height: 50.0,
                     child: TextFormField(
                       controller: passwordController,
+                      cursorColor: Color(0xFF1548AD),
                       textAlignVertical: TextAlignVertical.center,
                       obscureText: _isPasswordVisible,
                       decoration: InputDecoration(
