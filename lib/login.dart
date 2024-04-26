@@ -98,51 +98,51 @@ class LoginPageState extends State<Login> {
 
       final responseData = json.decode(response.body);
 
-      if (response.statusCode == 401) {
-        if (responseData['status'] == false) {
-          if (responseData['message'] == "validation error") {
-            if (responseData['errors'] != null) {
-              if (responseData['errors']['email'] != null) {
-                _showErrorDialog(responseData['errors']['email'][0]);
+      if (response.statusCode == 200 &&
+          responseData['status'] == true &&
+          responseData['token'] != null) {
+        String token = responseData['token'];
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', token);
+
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text("Notifikasi"),
+            content: Text("Anda berhasil login."),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => BottomNavBar()),
+                  );
+                },
+                child: Text('OK'),
+              ),
+            ],
+          ),
+        );
+      } else {
+        if (response.statusCode == 401) {
+          if (responseData['status'] == false) {
+            if (responseData['message'] == "validation error") {
+              if (responseData['errors'] != null) {
+                if (responseData['errors']['email'] != null) {
+                  _showErrorDialog(responseData['errors']['email'][0]);
+                }
+                if (responseData['errors']['password'] != null) {
+                  _showErrorDialog(responseData['errors']['password'][0]);
+                }
               }
-              if (responseData['errors']['password'] != null) {
-                _showErrorDialog(responseData['errors']['password'][0]);
-              }
+            } else if (responseData['message'] ==
+                "Email & Password does not match with our record.") {
+              _showErrorDialog("Email dan password tidak sesuai!");
             }
-          } else if (responseData['message'] ==
-              "Email & Password does not match with our record.") {
-            _showErrorDialog("Email dan password tidak sesuai!");
           }
         } else {
-          String token = responseData['token'];
-          SharedPreferences prefs = await SharedPreferences.getInstance();
-          await prefs.setString('token', token);
-
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: Text("Login Berhasil"),
-              actions: <Widget>[
-                TextButton(
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => BottomNavBar()),
-                    );
-                  },
-                  child: Text('OK'),
-                ),
-              ],
-            ),
-          );
-
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => BottomNavBar()),
-          );
+          print("HTTP Error ${response.statusCode}: ${response.reasonPhrase}");
         }
-      } else {
-        print("HTTP Error ${response.statusCode}: ${response.reasonPhrase}");
       }
     } catch (error) {
       print("Error: $error");
