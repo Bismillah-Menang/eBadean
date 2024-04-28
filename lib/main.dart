@@ -1,7 +1,8 @@
-import 'package:e_badean/bottom_nav/bottom_nav.dart';
-import 'package:e_badean/login.dart';
-import 'package:e_badean/register/fullname.dart';
-import 'package:e_badean/splash.dart';
+import 'package:e_badean/ui/bottomnav/bottomnav.dart';
+import 'package:e_badean/ui/login/login.dart';
+import 'package:e_badean/ui/login/lupas.dart';
+import 'package:e_badean/ui/register/fullname.dart';
+import 'package:e_badean/ui/splash.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -27,6 +28,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => Splash(),
         '/daftar': (context) => Fullname(),
+        '/lupas': (context) => Lupas(),
         '/login': (context) => Login(),
         '/bottomnav': (context) => BottomNavBar(),
       },
