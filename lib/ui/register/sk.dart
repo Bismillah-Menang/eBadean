@@ -226,12 +226,12 @@ class SyarkenPageState extends State<Syarken> {
                     builder: (context) => AlertDialog(
                       title: Text("Registrasi Berhasil"),
                       actions: <Widget>[
-                         TextButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/bottomnav');
-                },
-                child: Text('OK'),
-              ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/bottomnav');
+                          },
+                          child: Text('OK'),
+                        ),
                       ],
                     ),
                   );

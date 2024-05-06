@@ -2,12 +2,16 @@ import 'dart:convert';
 import 'package:e_badean/ui/register/sk.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:e_badean/ip.dart';
 
 class Password extends StatefulWidget {
-  final String fullname;
+  final String nama_lengkap;
   final String username;
   final String email;
-  Password({required this.fullname, required this.username, required this.email});
+  Password(
+      {required this.nama_lengkap,
+      required this.username,
+      required this.email});
 
   @override
   PasswordPageState createState() => PasswordPageState();
@@ -17,14 +21,15 @@ class PasswordPageState extends State<Password> {
   bool _isPasswordVisible = true;
   TextEditingController passController = TextEditingController();
 
-  Future<void> _register(BuildContext context, String fullname, String username, String email, String password) async {
-    String url = "http://127.0.0.1:8000/api/register";
+  Future<void> _register(BuildContext context, String nama_lengkap,
+      String username, String email, String password) async {
+    String url = "${ApiConfig.baseUrl}/api/register";
 
     try {
       final response = await http.post(
         Uri.parse(url),
         body: {
-          'fullname': fullname,
+          'nama_lengkap': nama_lengkap,
           'username': username,
           'email': email,
           'password': password,
@@ -62,7 +67,7 @@ class PasswordPageState extends State<Password> {
       appBar: AppBar(),
       body: SingleChildScrollView(
         physics: NeverScrollableScrollPhysics(),
-         padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
+        padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
@@ -124,7 +129,7 @@ class PasswordPageState extends State<Password> {
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                  _register(context, widget.fullname, widget.username,
+                  _register(context, widget.nama_lengkap, widget.username,
                       widget.email, passController.text);
                 },
                 child: Text(
@@ -139,13 +144,13 @@ class PasswordPageState extends State<Password> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  padding: EdgeInsets.symmetric(vertical: 15),
+                  padding: EdgeInsets.symmetric(vertical: 10),
                   backgroundColor: Color(0xFF1548AD),
                   minimumSize: Size(double.infinity, 0),
                 ),
               ),
             ),
-            SizedBox(height: 420.0), 
+            SizedBox(height: 420.0),
             Divider(),
           ],
         ),

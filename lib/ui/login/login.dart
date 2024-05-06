@@ -1,6 +1,9 @@
 import 'dart:convert';
+import 'package:e_badean/database/db_helper.dart';
+import 'package:e_badean/models/user.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:e_badean/ip.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Login extends StatefulWidget {
@@ -19,26 +22,11 @@ class LoginPageState extends State<Login> {
 
     // Validasi email
     if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text("Login Gagal"),
-          content: Text("Harap masukkan email yang valid"),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text('OK'),
-            ),
-          ],
-        ),
-      );
+      _showErrorDialog("Harap masukkan email yang valid");
       return;
     }
 
-    // Lanjutkan dengan proses login jika semua validasi terpenuhi
-    String url = "http://127.0.0.1:8000/api/login";
+    String url = "${ApiConfig.baseUrl}/api/login";
 
     try {
       final response = await http.post(
@@ -56,49 +44,82 @@ class LoginPageState extends State<Login> {
       if (response.statusCode == 200 &&
           responseData['status'] == true &&
           responseData['token'] != null) {
-        String token = responseData['token'];
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('token', token);
+        print("Token berhasil didapatkan: ${responseData['token']}");
+        await _saveToken(responseData['token']);
 
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: Text("Notifikasi"),
-            content: Text("Anda berhasil login."),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/bottomnav');
-                },
-                child: Text('OK'),
-              ),
-            ],
-          ),
-        );
-      } else {
-        if (response.statusCode == 401) {
-          if (responseData['status'] == false) {
-            if (responseData['message'] == "validation error") {
-              if (responseData['errors'] != null) {
-                if (responseData['errors']['email'] != null) {
-                  _showErrorDialog(responseData['errors']['email'][0]);
-                }
-                if (responseData['errors']['password'] != null) {
-                  _showErrorDialog(responseData['errors']['password'][0]);
-                }
-              }
-            } else if (responseData['message'] ==
-                "Email & Password does not match with our record.") {
-              _showErrorDialog("Email dan password tidak sesuai!");
-            }
+        User? loggedInUser = await getUserFromToken(responseData['token']);
+
+        if (loggedInUser != null) {
+          await DBHelper.saveUser(loggedInUser, responseData['token']);
+          // ignore: unnecessary_null_comparison
+          if (loggedInUser != null) {
+            await DBHelper.saveUser(loggedInUser, responseData['token']);
+            print("Data pengguna tersimpan di SQLite: $loggedInUser"); 
+            _showSuccessDialog("Anda berhasil login.");
+          } else {
+            _showErrorDialog("Gagal mendapatkan data pengguna.");
           }
+
+          _showSuccessDialog("Anda berhasil login.");
         } else {
-          print("HTTP Error ${response.statusCode}: ${response.reasonPhrase}");
+          _showErrorDialog("Gagal mendapatkan data pengguna.");
         }
-      }
+      } else {}
     } catch (error) {
       print("Error: $error");
       _showErrorDialog("Terjadi kesalahan. Silakan coba lagi.");
+    }
+  }
+
+  Future<void> _saveToken(String token) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('token', token);
+  }
+
+  Future<User?> getUserFromToken(String token) async {
+    try {
+      String url = "${ApiConfig.baseUrl}/api/get_user";
+
+      final response = await http.get(
+        Uri.parse(url),
+        headers: <String, String>{
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      print("Response getUserFromToken: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        // Pastikan responseData berupa objek JSON yang sesuai dengan struktur User
+        return User.fromJson(responseData);
+      } else {
+        print("Failed to get user data: ${response.statusCode}");
+        return null;
+      }
+    } catch (error) {
+      print("Error getting user data: $error");
+      return null;
+    }
+  }
+
+  void _handleLoginError(dynamic responseData, int statusCode) {
+    if (statusCode == 401) {
+      if (responseData['status'] == false) {
+        if (responseData['message'] == "validation error") {
+          var errors = responseData['errors'];
+          if (errors != null) {
+            errors.forEach((key, value) {
+              _showErrorDialog(value[0]);
+            });
+          }
+        } else if (responseData['message'] ==
+            "Email & Password does not match with our record.") {
+          _showErrorDialog("Email dan password tidak sesuai!");
+        }
+      }
+    } else {
+      print("HTTP Error $statusCode: ${responseData['message']}");
     }
   }
 
@@ -120,6 +141,24 @@ class LoginPageState extends State<Login> {
     );
   }
 
+  void _showSuccessDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Notifikasi"),
+        content: Text(message),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.pushNamed(context, '/bottomnav');
+            },
+            child: Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -127,7 +166,7 @@ class LoginPageState extends State<Login> {
       home: Scaffold(
         body: SingleChildScrollView(
           physics: NeverScrollableScrollPhysics(),
-          padding: EdgeInsets.symmetric(horizontal: 35.0, vertical: 105.0),
+          padding: EdgeInsets.symmetric(horizontal: 32.0, vertical: 105.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -162,6 +201,7 @@ class LoginPageState extends State<Login> {
                       controller: emailController,
                       decoration: InputDecoration(
                         labelText: 'Email',
+                        labelStyle: TextStyle(fontSize: 13.0),
                         prefixIcon: Icon(Icons.person),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -186,7 +226,7 @@ class LoginPageState extends State<Login> {
                       obscureText: _isPasswordVisible,
                       decoration: InputDecoration(
                         labelText: 'Password',
-                        labelStyle: TextStyle(fontSize: 14.0),
+                        labelStyle: TextStyle(fontSize: 13.0),
                         prefixIcon: Icon(Icons.key),
                         suffixIcon: IconButton(
                           onPressed: () {
@@ -218,10 +258,7 @@ class LoginPageState extends State<Login> {
               SizedBox(height: 20.0),
               Center(
                 child: ElevatedButton(
-                  onPressed: () {
-                      Navigator.pushNamed(context, '/bottomnav');
-                    },
-                  // onPressed: _login,
+                  onPressed: _login,
                   child: Text(
                     "Login",
                     style: TextStyle(

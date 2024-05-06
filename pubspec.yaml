@@ -35,7 +35,7 @@ dependencies:
   http: ^1.2.1
   json_annotation: ^4.8.1
   json_serializable: ^6.7.1
-  shared_preferences: ^2.2.2
+  shared_preferences: ^2.2.3
   sqflite: ^2.3.3
 
 dev_dependencies:

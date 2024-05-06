@@ -1,4 +1,6 @@
+import 'package:e_badean/ui/bottomnav/layanan.dart';
 import 'package:e_badean/ui/bottomnav/bottomnav.dart';
+import 'package:e_badean/ui/detail/detaillayanan.dart';
 import 'package:e_badean/ui/login/login.dart';
 import 'package:e_badean/ui/login/lupas.dart';
 import 'package:e_badean/ui/register/fullname.dart';
@@ -30,6 +32,8 @@ class MyApp extends StatelessWidget {
         '/daftar': (context) => Fullname(),
         '/lupas': (context) => Lupas(),
         '/login': (context) => Login(),
+        '/layanan': (context) => Layanan(),
+        '/detaillayanan': (context) => DetailLayanan(),
         '/bottomnav': (context) => BottomNavBar(),
       },
     );

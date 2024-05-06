@@ -7,22 +7,21 @@ part of 'layanan.dart';
 // **************************************************************************
 
 Layanan _$LayananFromJson(Map<String, dynamic> json) => Layanan(
-      id: json['id'] as int,
-      kode_surat: json['kode_surat'] as String,
-      nama_surat: json['nama_surat'] as String,
-      jenis_surat: json['jenis_surat'] as String,
-    );
+      nama_layanan: json['nama_layanan'] as String,
+      jenis_layanan: json['jenis_layanan'] as String,
+      info_layanan: json['info_layanan'] as String,
+    )..id = json['id'] as int?;
 
 Map<String, dynamic> _$LayananToJson(Layanan instance) => <String, dynamic>{
       'id': instance.id,
-      'kode_surat': instance.kode_surat,
-      'nama_surat': instance.nama_surat,
-      'jenis_surat': instance.jenis_surat,
+      'nama_layanan': instance.nama_layanan,
+      'jenis_layanan': instance.jenis_layanan,
+      'info_layanan': instance.info_layanan,
     };
 
 LayananList _$LayananListFromJson(Map<String, dynamic> json) => LayananList(
-      data: (json['data'] as List<dynamic>)
-          .map((e) => Layanan.fromJson(e as Map<String, dynamic>))
+      data: (json['data'] as List<dynamic>?)
+          ?.map((e) => Layanan.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
 

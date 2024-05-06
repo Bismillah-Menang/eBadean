@@ -5,7 +5,6 @@ import 'package:e_badean/ui/bottomnav/berita.dart';
 import 'package:e_badean/ui/bottomnav/profil.dart';
 import 'package:e_badean/ui/bottomnav/riwayat.dart';
 
-
 class BottomNavBar extends StatefulWidget {
   const BottomNavBar({Key? key});
 
@@ -56,14 +55,14 @@ class _BottomNavBarState extends State<BottomNavBar> {
                 borderRadius: BorderRadius.circular(30),
                 child: BottomNavigationBar(
                   selectedItemColor: Color(0xFF1548AD),
-                  unselectedItemColor: Colors.blueGrey,
+                  unselectedItemColor: Colors.grey[700],
                   currentIndex: _currentIndex,
                   onTap: (index) {
                     setState(() {
                       _currentIndex = index;
                     });
                   },
-                  items: const [
+                  items: [
                     BottomNavigationBarItem(
                       icon: Icon(Icons.home),
                       label: "Home",

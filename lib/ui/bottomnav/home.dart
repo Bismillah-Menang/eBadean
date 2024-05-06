@@ -1,4 +1,7 @@
+import 'package:e_badean/ip.dart';
 import 'package:e_badean/models/layanan.dart';
+import 'package:e_badean/models/berita.dart';
+import 'package:e_badean/ui/detail/detailberita.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -11,14 +14,27 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  Future<LayananList> fetchData() async {
+  Future<LayananList> fetchLayanan() async {
     final response =
-        await http.get(Uri.parse('http://127.0.0.1:8000/api/layanan'));
+        await http.get(Uri.parse('${ApiConfig.baseUrl}/api/layanan'));
 
     if (response.statusCode == 200) {
       Map<String, dynamic> jsonData = json.decode(response.body);
       LayananList layananList = LayananList.fromJson(jsonData);
       return layananList;
+    } else {
+      throw Exception('Failed to load data');
+    }
+  }
+
+  Future<BeritaList> fetchBerita() async {
+    final response =
+        await http.get(Uri.parse('${ApiConfig.baseUrl}/api/berita'));
+
+    if (response.statusCode == 200) {
+      Map<String, dynamic> jsonData = json.decode(response.body);
+      BeritaList beritaList = BeritaList.fromJson(jsonData);
+      return beritaList;
     } else {
       throw Exception('Failed to load data');
     }
@@ -31,8 +47,8 @@ class _HomeState extends State<Home> {
         child: SingleChildScrollView(
           child: Padding(
             padding: EdgeInsets.only(
-              top: 40.0,
-              bottom: 85.0,
+              top: 20.0,
+              bottom: 75.0,
               left: 20.0,
               right: 20.0,
             ),
@@ -83,7 +99,7 @@ class _HomeState extends State<Home> {
                     ],
                   ),
                 ),
-                SizedBox(height: 20.0),
+                SizedBox(height: 5.0),
                 Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -109,10 +125,22 @@ class _HomeState extends State<Home> {
                               color: Color(0xFF0046F8),
                             ),
                           ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pushNamed(context, '/layanan');
+                            },
+                            child: Text(
+                              "Lihat Semua",
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontFamily: 'Poppins',
+                                  fontSize: 12),
+                            ),
+                          ),
                         ],
                       ),
                       FutureBuilder<LayananList>(
-                        future: fetchData(),
+                        future: fetchLayanan(),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
@@ -120,24 +148,30 @@ class _HomeState extends State<Home> {
                           } else if (snapshot.hasError) {
                             return Text('Error: ${snapshot.error}');
                           } else {
+                            final layananData =
+                                snapshot.data?.data?.take(8).toList() ?? [];
                             return GridView.builder(
                               shrinkWrap: true,
-                              padding: EdgeInsets.only(top: 20.0, bottom: 20.0),
+                              padding: EdgeInsets.only(top: 5.0, bottom: 20.0),
                               gridDelegate:
                                   SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: 4,
                                 mainAxisSpacing: 15.0,
                                 crossAxisSpacing: 12.0,
                               ),
-                              itemCount: snapshot.data!.data.length,
+                              itemCount: layananData.length,
                               itemBuilder: (context, index) {
-                                Layanan layanan = snapshot.data!.data[index];
+                                Layanan layanan = layananData[index];
                                 return RoundedIconButton(
-                                  onPressed: () {},
+                                  onTap: () {
+                                    Navigator.pushNamed(
+                                        context, '/detaillayanan',
+                                        arguments: layanan.nama_layanan);
+                                  },
                                   icon: Icon(Icons.insert_drive_file,
                                       size: 30.0, color: Color(0xFF0046F8)),
                                   color: Color(0xFFEBF0FF),
-                                  label: layanan.nama_surat,
+                                  label: layanan.nama_layanan,
                                 );
                               },
                             );
@@ -179,182 +213,98 @@ class _HomeState extends State<Home> {
                   ),
                 ),
                 SizedBox(height: 20.0),
-                GestureDetector(
-                  onTap: () {},
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15.0),
-                      border: Border.all(
-                        color: Colors.black.withOpacity(0.6),
-                      ),
-                    ),
-                    child: Material(
-                      borderRadius: BorderRadius.circular(15.0),
-                      color: Colors.white60,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(15.0),
-                        onTap: () {},
-                        child: Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 60.0,
-                                height: 65.0,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10.0),
-                                ),
-                                child: Image.asset('assets/images/ijen.png'),
-                              ),
-                              SizedBox(width: 10.0),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Kawah Ijen kembali dibuka pada tanggal 01 April 2024',
-                                      style: TextStyle(
-                                        fontFamily: 'Poppins',
-                                        fontSize: 14.0,
-                                        fontWeight: FontWeight.bold,
+                FutureBuilder<BeritaList>(
+                  future: fetchBerita(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    } else {
+                      final beritaList = snapshot.data!;
+                      return SingleChildScrollView(
+                        physics: NeverScrollableScrollPhysics(),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: beritaList.data!.map((berita) {
+                            return Padding(
+                              padding: EdgeInsets.only(bottom: 20.0),
+                              child: InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => DetailBerita(
+                                        judul: berita.judul_berita,
+                                        tgl: berita.tgl_berita,
+                                        isi: berita.isi_berita,
+                                        foto: berita.foto_berita,
                                       ),
                                     ),
-                                    Text(
-                                      '01 April 2024 | 09.00 WIB',
-                                      style: TextStyle(
-                                        fontFamily: 'Poppins',
-                                        fontSize: 12.0,
-                                        color: Colors.grey[600],
-                                      ),
+                                  );
+                                },
+                                borderRadius: BorderRadius.circular(15.0),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(15.0),
+                                    border: Border.all(
+                                      color: Colors.black.withOpacity(0.6),
                                     ),
-                                  ],
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(15.0),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          width: 65.0,
+                                          height: 60.0,
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(10.0),
+                                          ),
+                                          clipBehavior: Clip.antiAlias,
+                                          child: Image.memory(
+                                            berita.foto_berita,
+                                            fit: BoxFit
+                                                .cover, // Sesuaikan dengan kebutuhan Anda
+                                          ),
+                                        ),
+                                        SizedBox(width: 15.0),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                berita.judul_berita,
+                                                style: TextStyle(
+                                                  fontFamily: 'Poppins',
+                                                  fontSize: 14.0,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              SizedBox(height: 5.0),
+                                              Text(
+                                                '${berita.tgl_berita}',
+                                                style: TextStyle(
+                                                  fontFamily: 'Poppins',
+                                                  fontSize: 12.0,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ],
-                          ),
+                            );
+                          }).toList(),
                         ),
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 20.0),
-                GestureDetector(
-                  onTap: () {},
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15.0),
-                      border: Border.all(
-                        color: Colors.black.withOpacity(0.6),
-                      ),
-                    ),
-                    child: Material(
-                      borderRadius: BorderRadius.circular(15.0),
-                      color: Colors.white60,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(15.0),
-                        onTap: () {},
-                        child: Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 60.0,
-                                height: 65.0,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10.0),
-                                ),
-                                child: Image.asset('assets/images/culture.png'),
-                              ),
-                              SizedBox(width: 10.0),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Bondowos culture Night Carnival, Memperkenalkan Seni dan Budaya',
-                                      style: TextStyle(
-                                        fontFamily: 'Poppins',
-                                        fontSize: 14.0,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    Text(
-                                      '02 April 2024 | 10.00 WIB',
-                                      style: TextStyle(
-                                        fontFamily: 'Poppins',
-                                        fontSize: 12.0,
-                                        color: Colors.grey[600],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 20.0),
-                GestureDetector(
-                  onTap: () {},
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15.0),
-                      border: Border.all(
-                        color: Colors.black.withOpacity(0.6),
-                      ),
-                    ),
-                    child: Material(
-                      borderRadius: BorderRadius.circular(15.0),
-                      color: Colors.white60,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(15.0),
-                        onTap: () {},
-                        child: Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 60.0,
-                                height: 65.0,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10.0),
-                                ),
-                                child:
-                                    Image.asset('assets/images/singoulung.png'),
-                              ),
-                              SizedBox(width: 10.0),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Mengulik legenda Singo Ulung Bondowoso hingga jadi Culturisite UNESCO',
-                                      style: TextStyle(
-                                        fontFamily: 'Poppins',
-                                        fontSize: 14.0,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    Text(
-                                      '02 April 2024 | 19.00 WIB',
-                                      style: TextStyle(
-                                        fontFamily: 'Poppins',
-                                        fontSize: 12.0,
-                                        color: Colors.grey[600],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                      );
+                    }
+                  },
                 ),
               ],
             ),
@@ -366,14 +316,14 @@ class _HomeState extends State<Home> {
 }
 
 class RoundedIconButton extends StatelessWidget {
-  final VoidCallback? onPressed;
+  final VoidCallback? onTap;
   final Widget icon;
   final Color? color;
   final String? label;
 
   const RoundedIconButton({
     Key? key,
-    required this.onPressed,
+    required this.onTap,
     required this.icon,
     this.color,
     this.label,
@@ -384,11 +334,11 @@ class RoundedIconButton extends StatelessWidget {
     return Material(
       color: color,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(50.0), 
+        borderRadius: BorderRadius.circular(40.0),
       ),
       child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(50.0),
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(40.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -400,7 +350,7 @@ class RoundedIconButton extends StatelessWidget {
               child: Text(
                 label ?? '',
                 textAlign: TextAlign.center,
-                maxLines: 2, 
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 12.0,

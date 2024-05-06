@@ -2,11 +2,12 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:e_badean/ui/register/password.dart';
 import 'package:flutter/material.dart';
+import 'package:e_badean/ip.dart';
 
 class Email extends StatefulWidget {
-  final String fullname;
+  final String nama_lengkap;
   final String username;
-  Email({required this.fullname, required this.username});
+  Email({required this.nama_lengkap, required this.username});
 
   @override
   EmailPageState createState() => EmailPageState();
@@ -15,14 +16,15 @@ class Email extends StatefulWidget {
 class EmailPageState extends State<Email> {
   TextEditingController emailController = TextEditingController();
 
-  Future<void> _register(BuildContext context, String fullname, String username, String email) async {
-    String url = "http://127.0.0.1:8000/api/register";
+  Future<void> _register(BuildContext context, String nama_lengkap,
+      String username, String email) async {
+    String url = "${ApiConfig.baseUrl}/api/register";
 
     try {
       final response = await http.post(
         Uri.parse(url),
         body: {
-          'fullname': fullname,
+          'nama_lengkap': nama_lengkap,
           'username': username,
           'email': email,
         },
@@ -32,14 +34,16 @@ class EmailPageState extends State<Email> {
 
       final responseData = json.decode(response.body);
 
-      if (responseData['errors'] != null && responseData['errors']['email'] != null &&
-          responseData['errors']['email'][0] == "The email has already been taken.") {
+      if (responseData['errors'] != null &&
+          responseData['errors']['email'] != null &&
+          responseData['errors']['email'][0] ==
+              "The email has already been taken.") {
         _showErrorDialog(context, "Email sudah terpakai.");
       } else if (responseData['status'] == false &&
           responseData['message'] == "Validation error" &&
           responseData['errors'] != null &&
           responseData['errors']['email'] == null) {
-        _navigateToPasswordPage(context, fullname, username, email);
+        _navigateToPasswordPage(context, nama_lengkap, username, email);
       } else {
         // Handle other cases if needed
       }
@@ -67,12 +71,13 @@ class EmailPageState extends State<Email> {
     );
   }
 
-  void _navigateToPasswordPage(BuildContext context, String fullname, String username, String email) {
+  void _navigateToPasswordPage(BuildContext context, String nama_lengkap,
+      String username, String email) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => Password(
-          fullname: fullname,
+          nama_lengkap: nama_lengkap,
           username: username,
           email: email,
         ),
@@ -127,7 +132,8 @@ class EmailPageState extends State<Email> {
               child: ElevatedButton(
                 onPressed: () {
                   if (emailController.text.isNotEmpty) {
-                    _register(context, widget.fullname, widget.username, emailController.text);
+                    _register(context, widget.nama_lengkap, widget.username,
+                        emailController.text);
                   } else {
                     _showErrorDialog(context, "Harap masukkan email anda!");
                   }
@@ -145,7 +151,7 @@ class EmailPageState extends State<Email> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  padding: EdgeInsets.symmetric(vertical: 15),
+                  padding: EdgeInsets.symmetric(vertical: 10),
                   backgroundColor: Color(0xFF1548AD),
                   minimumSize: Size(double.infinity, 0),
                 ),

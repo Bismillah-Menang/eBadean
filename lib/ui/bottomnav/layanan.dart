@@ -1,8 +1,8 @@
-import 'package:e_badean/ui/detaillayanan/detail.dart';
 import 'package:e_badean/models/layanan.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:e_badean/ip.dart';
 
 class Layanan extends StatefulWidget {
   const Layanan({Key? key}) : super(key: key);
@@ -22,7 +22,7 @@ class _LayananPageState extends State<Layanan> {
 
   Future<LayananList> fetchData() async {
     final response =
-        await http.get(Uri.parse('http://127.0.0.1:8000/api/layanan'));
+        await http.get(Uri.parse('${ApiConfig.baseUrl}/api/layanan'));
 
     if (response.statusCode == 200) {
       Map<String, dynamic> jsonData = json.decode(response.body);
@@ -48,9 +48,11 @@ class _LayananPageState extends State<Layanan> {
               final layananList = snapshot.data!;
               return SingleChildScrollView(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    vertical: 50.0,
-                    horizontal: 20.0,
+                  padding: EdgeInsets.only(
+                    top: 20.0,
+                    bottom: 75.0,
+                    left: 20.0,
+                    right: 20.0,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -93,21 +95,15 @@ class _LayananPageState extends State<Layanan> {
                       ListView.builder(
                         shrinkWrap: true,
                         physics: NeverScrollableScrollPhysics(),
-                        itemCount: layananList.data.length,
+                        itemCount: layananList.data?.length,
                         itemBuilder: (context, index) {
-                          final layanan = layananList.data[index];
+                          final layanan = layananList.data![index];
                           return Padding(
                             padding: EdgeInsets.only(bottom: 20.0),
                             child: InkWell(
                               onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => DetailPage(
-                                      namaSurat: layanan.nama_surat,
-                                    ),
-                                  ),
-                                );
+                                Navigator.pushNamed(context, '/detaillayanan',
+                                    arguments: layanan.nama_layanan);
                               },
                               borderRadius: BorderRadius.circular(15.0),
                               child: Container(
@@ -132,10 +128,11 @@ class _LayananPageState extends State<Layanan> {
                                       SizedBox(width: 15.0),
                                       Expanded(
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              layanan.nama_surat,
+                                              layanan.nama_layanan,
                                               style: TextStyle(
                                                 fontFamily: 'Poppins',
                                                 fontSize: 14.0,
@@ -143,7 +140,7 @@ class _LayananPageState extends State<Layanan> {
                                               ),
                                             ),
                                             Text(
-                                              'Keterangan',
+                                              layanan.info_layanan,
                                               style: TextStyle(
                                                 fontFamily: 'Poppins',
                                                 fontSize: 12.0,

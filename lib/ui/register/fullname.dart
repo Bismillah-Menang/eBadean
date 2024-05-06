@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:e_badean/ui/register/username.dart';
 import 'package:flutter/material.dart';
+import 'package:e_badean/ip.dart';
 
 class Fullname extends StatefulWidget {
   @override
@@ -11,48 +12,35 @@ class Fullname extends StatefulWidget {
 class FullnamePageState extends State<Fullname> {
   TextEditingController fullnameController = TextEditingController();
 
-  Future<void> _register(BuildContext context, String fullname) async {
-    String url = "http://127.0.0.1:8000/api/register";
+  Future<void> _register(BuildContext context, String namaLengkap) async {
+    String url = "${ApiConfig.baseUrl}/api/register";
 
     try {
       final response = await http.post(
         Uri.parse(url),
         body: {
-          'fullname': fullname,
+          'nama_lengkap': namaLengkap,
         },
       );
 
-      print("Response: ${response.body}"); 
+      print("Response: ${response.body}");
 
       final responseData = json.decode(response.body);
 
       if (responseData['status'] == false) {
         if (responseData['message'] == "Validation error") {
+          // Navigasi ke halaman Username
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => Username(fullname: fullname)),
-          );
-        } else {
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: Text("Registrasi Gagal"),
-              content: Text(responseData['message']),
-              actions: <Widget>[
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: Text('OK'),
-                ),
-              ],
-            ),
+            MaterialPageRoute(
+                builder: (context) => Username(nama_lengkap: namaLengkap)),
           );
         }
       }
     } catch (error) {
       print("Error: $error");
     }
+    return null;
   }
 
   @override
@@ -114,7 +102,7 @@ class FullnamePageState extends State<Fullname> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  padding: EdgeInsets.symmetric(vertical: 15),
+                  padding: EdgeInsets.symmetric(vertical: 10),
                   backgroundColor: Color(0xFF1548AD),
                   minimumSize: Size(double.infinity, 0),
                 ),
