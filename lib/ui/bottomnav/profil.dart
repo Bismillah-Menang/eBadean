@@ -2,10 +2,16 @@ import 'package:e_badean/database/db_helper.dart';
 import 'package:e_badean/models/user.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:e_badean/ui/login/login.dart';
 
-class Profil extends StatelessWidget {
-  const Profil({Key? key});
+class Profil extends StatefulWidget {
+  const Profil({Key? key}) : super(key: key);
 
+  @override
+  _ProfilPageState createState() => _ProfilPageState();
+}
+
+class _ProfilPageState extends State<Profil> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -91,6 +97,27 @@ class Profil extends StatelessWidget {
                                       ),
                                     ),
                                   ),
+                                  SizedBox(height: 30.0),
+                                  ElevatedButton(
+                                    onPressed: _logout,
+                                    child: Text(
+                                      "Logout",
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'Poppins'),
+                                    ),
+                                    style: ElevatedButton.styleFrom(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      padding:
+                                          EdgeInsets.symmetric(vertical: 10),
+                                      backgroundColor: Color(0xFFF90606),
+                                      minimumSize: Size(double.infinity, 0),
+                                    ),
+                                  ),
                                 ],
                               );
                             } else {
@@ -124,5 +151,17 @@ class Profil extends StatelessWidget {
     } else {
       return null;
     }
+  }
+
+  void _logout() async {
+    // Hapus token dari penyimpanan lokal
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token');
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => Login()),
+      (Route<dynamic> route) => false,
+    );
   }
 }
