@@ -70,17 +70,22 @@ class DBHelper {
   }
 
   static Future<User?> getUserFromLocal(String token) async {
-    final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query(
-      'user',
-      where: 'token = ?',
-      whereArgs: [token],
-    );
+    try {
+      final db = await database;
+      final List<Map<String, dynamic>> maps = await db.query(
+        'user',
+        where: 'token = ?',
+        whereArgs: [token],
+      );
 
-    if (maps.isEmpty) {
+      if (maps.isNotEmpty) {
+        return User.fromJson(maps.first);
+      } else {
+        return null;
+      }
+    } catch (error) {
+      print("Error fetching user from local database: $error");
       return null;
     }
-
-    return User.fromJson(maps.first);
   }
 }

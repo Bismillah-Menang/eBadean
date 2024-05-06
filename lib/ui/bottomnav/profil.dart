@@ -1,21 +1,19 @@
 import 'package:e_badean/database/db_helper.dart';
 import 'package:e_badean/models/user.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Profil extends StatelessWidget {
   const Profil({Key? key});
 
   @override
   Widget build(BuildContext context) {
-    // Ambil token dari SharedPreferences atau sumber lainnya
-    String token = "token";
-
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.symmetric(
             vertical: 50.0,
-            horizontal: 25.0,
+            horizontal: 35.0,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -33,7 +31,7 @@ class Profil extends StatelessWidget {
                     ),
                     SizedBox(height: 40.0),
                     FutureBuilder<User?>(
-                      future: DBHelper.getUserFromLocal(token),
+                      future: _getUserFromLocal(),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
@@ -46,34 +44,62 @@ class Profil extends StatelessWidget {
                               User user = snapshot.data!;
                               return Column(
                                 children: [
-                                  Text(
-                                    'Nama: ${user.nama_lengkap}',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontFamily: 'Poppins',
-                                    ),
-                                  ),
-                                  Text(
-                                    'Email: ${user.email}',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontFamily: 'Poppins',
-                                    ),
-                                  ),
-                                  // Tambahkan detail profil lainnya
-                                ],
-                              );
-                            } else {
-                              // Jika data pengguna tidak ditemukan, gunakan URL default
-                              return Column(
-                                children: [
                                   CircleAvatar(
                                     radius: 75.0,
                                     backgroundImage: NetworkImage(
                                       'https://miro.medium.com/v2/resize:fit:786/format:webp/1*DLJ3UGHPWDtrzfcMTYjfZw.jpeg',
                                     ),
                                   ),
+                                  SizedBox(height: 30.0),
+                                  Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      'Fullname: ${user.nama_lengkap}',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontFamily: 'Poppins',
+                                      ),
+                                    ),
+                                  ),
+                                  Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      'Email: ${user.email}',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontFamily: 'Poppins',
+                                      ),
+                                    ),
+                                  ),
+                                  Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      'No Telepon: ${user.no_hp}',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontFamily: 'Poppins',
+                                      ),
+                                    ),
+                                  ),
+                                  Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      'Alamat: ${user.alamat}',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontFamily: 'Poppins',
+                                      ),
+                                    ),
+                                  ),
                                 ],
+                              );
+                            } else {
+                              return Text(
+                                'Data pengguna tidak ditemukan.',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontFamily: 'Poppins',
+                                ),
                               );
                             }
                           }
@@ -88,5 +114,15 @@ class Profil extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<User?> _getUserFromLocal() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+    if (token != null) {
+      return DBHelper.getUserFromLocal(token);
+    } else {
+      return null;
+    }
   }
 }

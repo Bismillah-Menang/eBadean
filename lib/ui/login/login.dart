@@ -51,20 +51,16 @@ class LoginPageState extends State<Login> {
 
         if (loggedInUser != null) {
           await DBHelper.saveUser(loggedInUser, responseData['token']);
-          // ignore: unnecessary_null_comparison
-          if (loggedInUser != null) {
-            await DBHelper.saveUser(loggedInUser, responseData['token']);
-            print("Data pengguna tersimpan di SQLite: $loggedInUser"); 
-            _showSuccessDialog("Anda berhasil login.");
-          } else {
-            _showErrorDialog("Gagal mendapatkan data pengguna.");
-          }
-
-          _showSuccessDialog("Anda berhasil login.");
+          print(
+              "Data pengguna tersimpan di SQLite: Email: ${loggedInUser.email}, Username: ${loggedInUser.username}");
+          // Tampilkan dialog sukses
+          _showSuccessDialog("Anda berhasil login.", loggedInUser, responseData['token']);
         } else {
           _showErrorDialog("Gagal mendapatkan data pengguna.");
         }
-      } else {}
+      } else {
+        _handleLoginError(responseData, response.statusCode);
+      }
     } catch (error) {
       print("Error: $error");
       _showErrorDialog("Terjadi kesalahan. Silakan coba lagi.");
@@ -141,12 +137,23 @@ class LoginPageState extends State<Login> {
     );
   }
 
-  void _showSuccessDialog(String message) {
+  void _showSuccessDialog(String message, User user, String token) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text("Notifikasi"),
-        content: Text(message),
+        content: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(message),
+            SizedBox(height: 10),
+            Text("Data Pengguna:"),
+            Text("Email: ${user.email}"),
+            Text("Username: ${user.username}"),
+            Text("Token: $token"),
+          ],
+        ),
         actions: <Widget>[
           TextButton(
             onPressed: () {
