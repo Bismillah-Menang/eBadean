@@ -32,11 +32,12 @@ dependencies:
   cupertino_icons: ^1.0.2
   flutter:
     sdk: flutter
-  http: ^1.2.1
+  http: ^1.2.0
   json_annotation: ^4.8.1
   json_serializable: ^6.7.1
   shared_preferences: ^2.2.3
-  sqflite: ^2.3.3
+  sqflite: ^2.3.2
+  fluttertoast: ^8.2.5
 
 dev_dependencies:
   flutter_lints: ^2.0.0
