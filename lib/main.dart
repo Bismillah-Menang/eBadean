@@ -3,7 +3,7 @@ import 'package:e_badean/ui/bottomnav/bottomnav.dart';
 import 'package:e_badean/ui/detail/detaillayanan.dart';
 import 'package:e_badean/ui/login/login.dart';
 import 'package:e_badean/ui/login/lupas.dart';
-import 'package:e_badean/ui/register/fullname.dart';
+import 'package:e_badean/ui/register/register.dart';
 import 'package:e_badean/ui/splash.dart';
 import 'package:flutter/material.dart';
 
@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => Splash(),
-        '/daftar': (context) => Fullname(),
+        '/daftar': (context) => Register(),
         '/lupas': (context) => Lupas(),
         '/login': (context) => Login(),
         '/layanan': (context) => Layanan(),

@@ -267,7 +267,7 @@ class LoginPageState extends State<Login> {
                 child: ElevatedButton(
                   onPressed: _login,
                   child: Text(
-                    "Login",
+                    "Masuk",
                     style: TextStyle(
                         fontSize: 16,
                         color: Colors.white,
