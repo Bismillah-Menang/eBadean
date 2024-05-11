@@ -12,6 +12,12 @@ class Login extends StatefulWidget {
 }
 
 class LoginPageState extends State<Login> {
+  @override
+  void initState() {
+    super.initState();
+    _getEmailSharedPreferences();
+  }
+
   bool _isPasswordVisible = true;
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
@@ -54,7 +60,8 @@ class LoginPageState extends State<Login> {
           print(
               "Data pengguna tersimpan di SQLite: Email: ${loggedInUser.email}, Username: ${loggedInUser.username}");
           // Tampilkan dialog sukses
-          _showSuccessDialog("Anda berhasil login.", loggedInUser, responseData['token']);
+          _showSuccessDialog(
+              "Anda berhasil login.", loggedInUser, responseData['token']);
         } else {
           _showErrorDialog("Gagal mendapatkan data pengguna.");
         }
@@ -65,6 +72,30 @@ class LoginPageState extends State<Login> {
       print("Error: $error");
       _showErrorDialog("Terjadi kesalahan. Silakan coba lagi.");
     }
+  }
+
+// digunakan untuk mengambil email di dalam sharedpreference
+  void _getEmailSharedPreferences() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? savedEmail = prefs.getString('registered_email');
+    if (savedEmail != null) {
+      print('Email dari SharedPreferences: $savedEmail');
+      setState(() {
+        emailController.text = savedEmail;
+      });
+    }
+  }
+
+// digunakan untuk menampilkan email di dalam field
+  void setEmailControllerText(String email) {
+    setState(() {
+      emailController.text = email;
+    });
+  }
+
+  Future<void> _saveEmailSharedPreferences(String email) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('email', email);
   }
 
   Future<void> _saveToken(String token) async {
@@ -301,6 +332,7 @@ class LoginPageState extends State<Login> {
                   ),
                 ],
               ),
+              SizedBox(height: 20),
               Center(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -311,7 +343,7 @@ class LoginPageState extends State<Login> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 18.0),
                       child: Text(
-                        'atau',
+                        'Ketentuan Aplikasi E-Badean',
                         style: TextStyle(
                           fontSize: 12.0,
                           fontFamily: 'Poppins',
@@ -325,38 +357,11 @@ class LoginPageState extends State<Login> {
                 ),
               ),
               SizedBox(height: 20.0),
-              Center(
-                child: OutlinedButton.icon(
-                  onPressed: () {},
-                  icon: Image.asset(
-                    'assets/images/google.png',
-                    width: 24,
-                    height: 24,
-                  ),
-                  label: Text(
-                    'Masuk dengan Google',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      color: Colors.black,
-                      fontSize: 13,
-                    ),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    padding: EdgeInsets.symmetric(vertical: 10),
-                    side: BorderSide(color: Colors.black),
-                    minimumSize: Size(double.infinity, 0),
-                  ),
-                ),
-              ),
-              SizedBox(height: 20.0),
               Text(
                 'Dengan masuk ke aplikasi E-Badean, kamu menyetujui segala Syarat dan Ketentuan dan Kebijakan Privasi E-Badean',
                 style: TextStyle(fontSize: 10.0, fontFamily: 'Poppins'),
               ),
-              SizedBox(height: 70.0),
+              SizedBox(height: 80.0),
               Divider(),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,

@@ -158,6 +158,10 @@ class _ProfilPageState extends State<Profil> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove('token');
 
+    // Hapus email terdaftar (opsional, tergantung kebutuhan aplikasi)
+    await prefs.remove('registered_email');
+
+    // Navigasi ke halaman login dan hapus stack navigasi sebelumnya
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => Login()),
