@@ -1,6 +1,8 @@
+import 'package:e_badean/ip.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:mailer/mailer.dart';
+import 'package:http/http.dart' as http;
 import 'package:mailer/smtp_server/gmail.dart';
 import 'package:awesome_dialog/awesome_dialog.dart'; // Import package awesome_dialog
 
@@ -35,10 +37,10 @@ class LupasPageState extends State<Lupas> {
 
   void sendVerificationEmail(
       String recipientEmail, String verificationCode) async {
-    final smtpServer = gmail('mfajardwip044@gmail.com', 'eeinsdzwmvzdsupp');
+    final smtpServer = gmail('badeanassistance@gmail.com', 'kkvtonebvbewrysk');
 
     final message = Message()
-      ..from = Address('mfajardwip044@gmail.com', 'M fajar Dwip')
+      ..from = Address('badeanassistance@gmail.com', 'Badean Assistance')
       ..recipients.add(recipientEmail)
       ..subject = 'Verification Code for Your App'
       ..text = 'Your verification code is: $verificationCode';
@@ -54,12 +56,50 @@ class LupasPageState extends State<Lupas> {
     }
   }
 
+  Future<void> updatePassword(String email, String password) async {
+    String url = "${ApiConfig.baseUrl}/api/gantipassword";
+
+    try {
+      var response = await http.post(
+        Uri.parse(url),
+        body: {
+          'email': email,
+          'password': password,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print('Password updated successfully');
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text("Notifikasi"),
+            content: Text("Password berhasil diperbarui"),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/login');
+                },
+                child: Text('OK'),
+              ),
+            ],
+          ),
+        );
+      } else {
+        print('Failed to update password');
+      }
+    } catch (e) {
+      print('Error updating password: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
       body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
+        padding: EdgeInsets.symmetric(horizontal: 25.0, vertical: 10.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
@@ -87,20 +127,15 @@ class LupasPageState extends State<Lupas> {
               child: TextFormField(
                 textAlignVertical: TextAlignVertical.center,
                 controller: emailController,
-                obscureText: false,
                 decoration: InputDecoration(
                   labelText: 'Masukkan Email',
                   labelStyle: TextStyle(fontSize: 14.0),
                   prefixIcon: Icon(Icons.mail),
-                  suffixIcon: IconButton(
-                    icon: Icon(Icons.visibility),
-                    onPressed: () {},
-                  ),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(15),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(15),
                     borderSide: BorderSide(
                       color: Color(0xFF1548AD),
                     ),
@@ -109,7 +144,6 @@ class LupasPageState extends State<Lupas> {
                 ),
               ),
             ),
-            SizedBox(height: 20.0),
             if (emailSent && !otpVerified)
               Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -155,9 +189,15 @@ class LupasPageState extends State<Lupas> {
                             dialogType: DialogType.error,
                             animType: AnimType.topSlide,
                             title: 'Pemberitahuan',
+                            titleTextStyle: TextStyle(
+                                fontFamily: 'Poppins',
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold),
                             desc:
                                 'Kode OTP yang dimasukkan tidak valid. Silakan coba lagi.',
+                            descTextStyle: TextStyle(fontFamily: 'Poppins'),
                             btnCancelOnPress: () {},
+                            btnOkColor: Colors.red,
                           )..show();
                         }
                       },
@@ -213,7 +253,8 @@ class LupasPageState extends State<Lupas> {
                   Center(
                     child: ElevatedButton(
                       onPressed: () {
-                        // Logika untuk mengubah password
+                        updatePassword(
+                            emailController.text, passwordController.text);
                       },
                       child: Text(
                         "Ubah Password",
@@ -227,7 +268,7 @@ class LupasPageState extends State<Lupas> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        padding: EdgeInsets.symmetric(vertical: 15),
+                        padding: EdgeInsets.symmetric(vertical: 10),
                         backgroundColor: Color(0xFF1548AD),
                         minimumSize: Size(double.infinity, 0),
                       ),
@@ -260,14 +301,12 @@ class LupasPageState extends State<Lupas> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    padding: EdgeInsets.symmetric(vertical: 15),
+                    padding: EdgeInsets.symmetric(vertical: 10),
                     backgroundColor: Color(0xFF1548AD),
                     minimumSize: Size(double.infinity, 0),
                   ),
                 ),
               ),
-            SizedBox(height: 402.0),
-            Divider(),
           ],
         ),
       ),

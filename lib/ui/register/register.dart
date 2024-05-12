@@ -4,7 +4,6 @@ import 'package:flutter/gestures.dart';
 import 'package:e_badean/ui/login/login.dart';
 import 'package:http/http.dart' as http;
 import 'package:e_badean/ip.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:e_badean/models/emailRegister.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
@@ -130,7 +129,7 @@ class RegisterPage extends State<Register> {
         );
         _showSuccessRegister("Register berhasil", result['user']);
       } else {
-        throw Exception('Failed to register user');
+        _showErrorDialog("Register Gagal, sepertinya ada yang salah");
       }
     } catch (error) {
       print('Network error: $error');
@@ -151,9 +150,28 @@ class RegisterPage extends State<Register> {
       dialogType: DialogType.success,
       animType: AnimType.bottomSlide,
       title: 'Registrasi Berhasil',
+      titleTextStyle: TextStyle(
+          fontFamily: 'Poppins', fontSize: 18, fontWeight: FontWeight.bold),
       desc:
           'Selamat datang, ${user['username']}!\nAkun Anda telah berhasil didaftarkan.',
+      descTextStyle: TextStyle(fontFamily: 'Poppins'),
       btnOkOnPress: () {},
+    )..show();
+  }
+
+  void _showErrorDialog(String message) {
+    AwesomeDialog(
+      context: context,
+      dialogType: DialogType.error,
+      animType: AnimType.bottomSlide,
+      title: 'Daftar akun Gagal',
+      titleTextStyle: TextStyle(
+          fontFamily: 'Poppins', fontSize: 18, fontWeight: FontWeight.bold),
+      desc: message,
+      descTextStyle: TextStyle(fontFamily: 'Poppins'),
+      btnOkText: 'OK',
+      btnOkOnPress: () {},
+      btnOkColor: Colors.red,
     )..show();
   }
 
@@ -170,6 +188,7 @@ class RegisterPage extends State<Register> {
       ),
     );
   }
+
 // kode yang digunakan untuk menyimpan ke dalam db_helper registeremail
   Future<void> _saveEmailSharedPreferences(
       String email, String username) async {
@@ -252,45 +271,52 @@ class RegisterPage extends State<Register> {
   }
 
   @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    appBar: AppBar(
-      title: Text(
-        'Daftar Akun',
-        textAlign: TextAlign.left,
-        style: TextStyle(
-          fontWeight: FontWeight.bold
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Daftar Akun',
+          textAlign: TextAlign.left,
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
-      ),
-      centerTitle: false,
-      bottom: null, 
+        centerTitle: false,
+        bottom: null,
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: EdgeInsets.symmetric(horizontal: 22.0, vertical: 20.0),
           child: Form(
             key: _formKey,
             autovalidateMode: _autovalidateMode,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                SizedBox(height: 5),
+                Text(
+                  'Jika kamu belum punya akun,  kamu bisa mendaftar dengan akun baru',
+                  style: TextStyle(fontSize: 14.0, fontFamily: 'Poppins'),
+                ),
+                SizedBox(height: 20.0),
                 TextFormField(
                   controller: fullnameController,
                   decoration: InputDecoration(
                     labelText: 'Masukkan nama lengkap',
+                    labelStyle: TextStyle(fontSize: 14.0),
+                    prefixIcon: Icon(Icons.person_2_outlined),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(15),
                       borderSide: BorderSide(color: Colors.grey),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(15),
-                      borderSide: BorderSide(color: Colors.grey),
+                      borderSide: BorderSide(
+                        color: Color(0xFF1548AD),
+                      ),
                     ),
+                    contentPadding: EdgeInsets.symmetric(vertical: 10.0),
                   ),
                   validator: (value) {
                     if (value!.isEmpty) {
-                      return 'nama harus diisi';
+                      return 'Nama harus diisi';
                     }
                     if (value.length < 10) {
                       return 'nama lengkap minimal 10';
@@ -301,19 +327,24 @@ Widget build(BuildContext context) {
                     return null;
                   },
                 ),
-                SizedBox(height: 10),
+                SizedBox(height: 20.0),
                 TextFormField(
                   controller: usernameController,
                   decoration: InputDecoration(
                     labelText: 'Nama akun',
+                    labelStyle: TextStyle(fontSize: 14.0),
+                    prefixIcon: Icon(Icons.person),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(15),
                       borderSide: BorderSide(color: Colors.grey),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(15),
+                      borderSide: BorderSide(
+                        color: Color(0xFF1548AD),
+                      ),
                     ),
+                    contentPadding: EdgeInsets.symmetric(vertical: 10.0),
                   ),
                   validator: (value) {
                     if (value!.isEmpty) {
@@ -322,19 +353,24 @@ Widget build(BuildContext context) {
                     return null;
                   },
                 ),
-                SizedBox(height: 10),
+                SizedBox(height: 20.0),
                 TextFormField(
                   controller: emailController,
                   decoration: InputDecoration(
                     labelText: 'Email',
+                    labelStyle: TextStyle(fontSize: 14.0),
+                    prefixIcon: Icon(Icons.mail),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(15),
                       borderSide: BorderSide(color: Colors.grey),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(15),
-                      borderSide: BorderSide(color: Colors.grey),
+                      borderSide: BorderSide(
+                        color: Color(0xFF1548AD),
+                      ),
                     ),
+                    contentPadding: EdgeInsets.symmetric(vertical: 10.0),
                   ),
                   validator: (value) {
                     if (value!.isEmpty) {
@@ -347,21 +383,24 @@ Widget build(BuildContext context) {
                     return null; // Jika valid
                   },
                 ),
-                SizedBox(height: 10.0),
-                // Password
+                SizedBox(height: 20.0),
                 TextFormField(
                   controller: passwordController,
                   obscureText:
                       !_passwordvisible, // Gunakan _passwordvisible untuk menentukan apakah teks tersembunyi atau tidak
                   decoration: InputDecoration(
                     labelText: 'Password',
+                    labelStyle: TextStyle(fontSize: 14.0),
+                    prefixIcon: Icon(Icons.key),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(15),
                       borderSide: BorderSide(color: Colors.grey),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(15),
-                      borderSide: BorderSide(color: Colors.grey),
+                      borderSide: BorderSide(
+                        color: Color(0xFF1548AD),
+                      ),
                     ),
                     suffixIcon: IconButton(
                       onPressed: () {
@@ -372,33 +411,39 @@ Widget build(BuildContext context) {
                       },
                       icon: Icon(
                         _passwordvisible
-                            ? Icons.visibility_off
-                            : Icons.visibility,
+                            ? Icons.visibility
+                            : Icons.visibility_off,
                       ),
                     ),
+                    contentPadding: EdgeInsets.symmetric(vertical: 10.0),
                   ),
                   validator: (value) {
                     if (value!.isEmpty) {
                       return 'Password tidak boleh kosong';
                     }
-                    // Validasi panjang karakter, kekuatan password, dll.
+                    if (value.length < 8) {
+                      return 'Password harus terdiri dari setidaknya 8 karakter';
+                    }
                     return null; // Jika valid
                   },
                 ),
-                SizedBox(height: 10.0),
-                // Confirm Password
+                SizedBox(height: 20.0),
                 TextFormField(
                   controller: confirmPassController,
                   obscureText: !_passwordvisiblekonfirmasi,
                   decoration: InputDecoration(
                     labelText: 'Konfirmasi Password',
+                    labelStyle: TextStyle(fontSize: 14.0),
+                    prefixIcon: Icon(Icons.key),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(15),
                       borderSide: BorderSide(color: Colors.grey),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(15),
-                      borderSide: BorderSide(color: Colors.grey),
+                      borderSide: BorderSide(
+                        color: Color(0xFF1548AD),
+                      ),
                     ),
                     suffixIcon: IconButton(
                       onPressed: () {
@@ -409,43 +454,64 @@ Widget build(BuildContext context) {
                       },
                       icon: Icon(
                         _passwordvisiblekonfirmasi
-                            ? Icons.visibility_off
-                            : Icons.visibility,
+                            ? Icons.visibility
+                            : Icons.visibility_off,
                       ),
                     ),
+                    contentPadding: EdgeInsets.symmetric(vertical: 10.0),
                   ),
                   validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Konfirmasi password tidak cocok';
+                    }
                     if (value != passwordController.text) {
                       return 'Konfirmasi password tidak cocok';
                     }
                     return null; // Jika valid
                   },
                 ),
-                SizedBox(height: 10.0),
+                SizedBox(height: 20.0),
                 // Nomor Handphone
                 TextFormField(
                   controller: phoneController,
                   keyboardType: TextInputType.phone,
                   decoration: InputDecoration(
                     labelText: 'Nomor Hp',
+                    labelStyle: TextStyle(fontSize: 14.0),
+                    prefixIcon: Icon(Icons.phone),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(15),
                       borderSide: BorderSide(color: Colors.grey),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(15),
-                      borderSide: BorderSide(color: Colors.grey),
+                      borderSide: BorderSide(
+                        color: Color(0xFF1548AD),
+                      ),
                     ),
+                    contentPadding: EdgeInsets.symmetric(vertical: 10.0),
                   ),
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Nomor telepon tidak boleh kosong';
+                    }
+                    // Regular expression untuk memeriksa format nomor telepon
+                    final RegExp phoneRegex =
+                        new RegExp(r"^(?:[+0]9)?[0-9]{10}$");
+                    if (!phoneRegex.hasMatch(value)) {
+                      return 'Nomor telepon tidak valid';
+                    }
+                    return null; // Jika valid
+                  },
                 ),
-                SizedBox(height: 10.0),
+                SizedBox(height: 20.0),
                 // Gender Selection
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'Jenis Kelamin',
-                      style: TextStyle(fontSize: 16),
+                      style: TextStyle(fontSize: 14, fontFamily: 'Poppins'),
                     ),
                     SizedBox(height: 10),
                     Column(
@@ -465,7 +531,13 @@ Widget build(BuildContext context) {
                                     : Colors.grey,
                               ),
                               SizedBox(width: 8),
-                              Text('Laki - Laki'),
+                              Text(
+                                'Laki - Laki',
+                                style: TextStyle(
+                                  fontFamily:
+                                      'Poppins', // Atur font family menjadi Poppins
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -485,7 +557,13 @@ Widget build(BuildContext context) {
                                     : Colors.grey,
                               ),
                               SizedBox(width: 8),
-                              Text('Wanita'),
+                              Text(
+                                'Perempuan',
+                                style: TextStyle(
+                                  fontFamily:
+                                      'Poppins', // Atur font family menjadi Poppins
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -493,22 +571,26 @@ Widget build(BuildContext context) {
                     ),
                   ],
                 ),
-                SizedBox(height: 10.0),
+                SizedBox(height: 20.0),
                 // Alamat
                 TextFormField(
                   maxLines: 3,
                   controller: alamatController,
                   decoration: InputDecoration(
                     labelText: 'Alamat',
+                    prefixIcon: Icon(Icons.maps_home_work),
                     border: OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.grey),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey),
+                      borderSide: BorderSide(
+                        color: Color(0xFF1548AD),
+                      ),
                     ),
+                    contentPadding: EdgeInsets.symmetric(vertical: 10.0),
                   ),
                 ),
-                SizedBox(height: 10.0),
+                SizedBox(height: 20.0),
                 // Tombol Register
                 ElevatedButton(
                   onPressed: () {
@@ -518,24 +600,24 @@ Widget build(BuildContext context) {
                     _registerUser(context);
                   },
                   style: ElevatedButton.styleFrom(
-                    primary: const Color.fromRGBO(21, 72, 173, 1),
-                    minimumSize: Size(double.infinity, 50),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(8),
                     ),
+                    padding: EdgeInsets.symmetric(vertical: 10),
+                    backgroundColor: Color(0xFF1548AD),
+                    minimumSize: Size(double.infinity, 0),
                   ),
                   child: Text(
-                    'Daftar',
-                    style: TextStyle(color: Colors.white),
+                    'DAFTAR',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'Poppins',
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold),
                   ),
                 ),
-                SizedBox(height: 15),
-                Divider(
-                  color: Colors.black,
-                  thickness: 1,
-                  indent: 0,
-                  endIndent: 0,
-                ),
+                SizedBox(height: 20),
+                Divider(),
                 TextButton(
                   onPressed: () {
                     Navigator.push(
@@ -546,11 +628,17 @@ Widget build(BuildContext context) {
                   child: RichText(
                     text: TextSpan(
                       text: 'Sudah punya akun? ',
-                      style: TextStyle(color: Colors.black),
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontFamily: 'Poppins',
+                        fontSize: 14.0,
+                      ),
                       children: <TextSpan>[
                         TextSpan(
                           text: 'Kembali',
                           style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 14.0,
                               color: const Color.fromRGBO(21, 72, 173, 1)),
                           recognizer: TapGestureRecognizer()
                             ..onTap = () {
@@ -562,8 +650,12 @@ Widget build(BuildContext context) {
                             },
                         ),
                         TextSpan(
-                          text: ' ke halaman login',
-                          style: TextStyle(color: Colors.black),
+                          text: ' untuk login',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontFamily: 'Poppins',
+                            fontSize: 14,
+                          ),
                         ),
                       ],
                     ),

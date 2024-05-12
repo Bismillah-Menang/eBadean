@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:e_badean/ip.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
 
 class Login extends StatefulWidget {
   @override
@@ -12,25 +13,25 @@ class Login extends StatefulWidget {
 }
 
 class LoginPageState extends State<Login> {
+  final _formKey = GlobalKey<FormState>();
+  bool _isPasswordVisible = true;
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
     _getEmailSharedPreferences();
   }
 
-  bool _isPasswordVisible = true;
-  TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
-
   Future<void> _login() async {
-    String email = emailController.text;
-    String password = passwordController.text;
-
-    // Validasi email
-    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
-      _showErrorDialog("Harap masukkan email yang valid");
+    // Panggil validate untuk menjalankan validator
+    if (!_formKey.currentState!.validate()) {
       return;
     }
+
+    String email = emailController.text;
+    String password = passwordController.text;
 
     String url = "${ApiConfig.baseUrl}/api/login";
 
@@ -86,7 +87,6 @@ class LoginPageState extends State<Login> {
     }
   }
 
-// digunakan untuk menampilkan email di dalam field
   void setEmailControllerText(String email) {
     setState(() {
       emailController.text = email;
@@ -151,120 +151,123 @@ class LoginPageState extends State<Login> {
   }
 
   void _showErrorDialog(String message) {
-    showDialog(
+    AwesomeDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text("Login Gagal"),
-        content: Text(message),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: Text('OK'),
-          ),
-        ],
-      ),
-    );
+      dialogType: DialogType.error,
+      animType: AnimType.bottomSlide,
+      title: 'Login Gagal',
+      titleTextStyle: TextStyle(
+          fontFamily: 'Poppins', fontSize: 18, fontWeight: FontWeight.bold),
+      desc: message,
+      descTextStyle: TextStyle(fontFamily: 'Poppins'),
+      btnOkText: 'OK',
+      btnOkOnPress: () {},
+      btnOkColor: Colors.red,
+    )..show();
   }
 
   void _showSuccessDialog(String message, User user, String token) {
-    showDialog(
+    AwesomeDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text("Notifikasi"),
-        content: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(message),
-            SizedBox(height: 10),
-            Text("Data Pengguna:"),
-            Text("Email: ${user.email}"),
-            Text("Username: ${user.username}"),
-            Text("Token: $token"),
-          ],
-        ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () {
-              Navigator.pushNamed(context, '/bottomnav');
-            },
-            child: Text('OK'),
-          ),
-        ],
-      ),
-    );
+      dialogType: DialogType.success,
+      animType: AnimType.bottomSlide,
+      title: 'Login Berhasil',
+      titleTextStyle: TextStyle(
+          fontFamily: 'Poppins', fontSize: 18, fontWeight: FontWeight.bold),
+      desc: message,
+      descTextStyle: TextStyle(fontFamily: 'Poppins'),
+      btnOkText: 'OK',
+      btnOkOnPress: () {
+        Navigator.pushNamed(context, '/bottomnav');
+      },
+      // body: Column(
+      //   crossAxisAlignment: CrossAxisAlignment.start,
+      //   children: [
+      //     SizedBox(height: 10),
+      //     Text("Data Pengguna:"),
+      //     Text("Email: ${user.email}"),
+      //     Text("Username: ${user.username}"),
+      //     Text("Token: $token"),
+      //   ],
+      // ),
+    )..show();
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        body: SingleChildScrollView(
-          physics: NeverScrollableScrollPhysics(),
-          padding: EdgeInsets.symmetric(horizontal: 32.0, vertical: 105.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  margin: EdgeInsets.only(bottom: 20.0),
-                  child: Image.asset('assets/images/badean_splash.png',
-                      width: 255.0, height: 55.0),
+    return Scaffold(
+      body: SingleChildScrollView(
+        physics: NeverScrollableScrollPhysics(),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 90.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    margin: EdgeInsets.only(bottom: 20.0),
+                    child: Image.asset('assets/images/badean_splash.png',
+                        width: 255.0, height: 55.0),
+                  ),
                 ),
-              ),
-              SizedBox(height: 20.0),
-              Text(
-                'Selamat datang di E-Badean',
-                style: TextStyle(
-                    fontSize: 16.0,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Poppins'),
-                textAlign: TextAlign.start,
-              ),
-              SizedBox(height: 10.0),
-              Text(
-                'Nikmati akses pelayanan surat dalam satu genggaman :)',
-                style: TextStyle(fontSize: 12.0, fontFamily: 'Poppins'),
-              ),
-              SizedBox(height: 20.0),
-              Column(
-                children: [
-                  SizedBox(
-                    height: 50.0,
-                    child: TextFormField(
+                SizedBox(height: 20.0),
+                Text(
+                  'Selamat datang di E-Badean',
+                  style: TextStyle(
+                      fontSize: 17.0,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Poppins'),
+                  textAlign: TextAlign.start,
+                ),
+                SizedBox(height: 10.0),
+                Text(
+                  'Nikmati akses pelayanan surat dalam satu genggaman :)',
+                  style: TextStyle(fontSize: 14.0, fontFamily: 'Poppins'),
+                ),
+                SizedBox(height: 20.0),
+                Column(
+                  children: [
+                    TextFormField(
                       cursorColor: Color(0xFF1548AD),
                       controller: emailController,
                       decoration: InputDecoration(
                         labelText: 'Email',
-                        labelStyle: TextStyle(fontSize: 13.0),
-                        prefixIcon: Icon(Icons.person),
+                        labelStyle: TextStyle(fontSize: 14.0),
+                        prefixIcon: Icon(Icons.mail),
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(15),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(15),
                           borderSide: BorderSide(
                             color: Color(0xFF1548AD),
                           ),
                         ),
                         contentPadding: EdgeInsets.symmetric(vertical: 10.0),
                       ),
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return 'Email tidak boleh kosong';
+                        }
+                        RegExp regex =
+                            RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                        if (!regex.hasMatch(value)) {
+                          return 'Format email tidak valid';
+                        }
+                        return null; // Jika valid
+                      },
                     ),
-                  ),
-                  SizedBox(height: 20.0),
-                  SizedBox(
-                    height: 50.0,
-                    child: TextFormField(
+                    SizedBox(height: 20.0),
+                    TextFormField(
                       controller: passwordController,
                       cursorColor: Color(0xFF1548AD),
                       textAlignVertical: TextAlignVertical.center,
                       obscureText: _isPasswordVisible,
                       decoration: InputDecoration(
                         labelText: 'Password',
-                        labelStyle: TextStyle(fontSize: 13.0),
+                        labelStyle: TextStyle(fontSize: 14.0),
                         prefixIcon: Icon(Icons.key),
                         suffixIcon: IconButton(
                           onPressed: () {
@@ -279,113 +282,132 @@ class LoginPageState extends State<Login> {
                           ),
                         ),
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(15),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(15),
                           borderSide: BorderSide(
                             color: Color(0xFF1548AD),
                           ),
                         ),
                         contentPadding: EdgeInsets.symmetric(vertical: 10.0),
                       ),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 20.0),
-              Center(
-                child: ElevatedButton(
-                  onPressed: _login,
-                  child: Text(
-                    "Masuk",
-                    style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Poppins'),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    padding: EdgeInsets.symmetric(vertical: 10),
-                    backgroundColor: Color(0xFF1548AD),
-                    minimumSize: Size(double.infinity, 0),
-                  ),
-                ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/lupas');
-                    },
-                    child: Text(
-                      'Lupa Password ?',
-                      style: TextStyle(
-                          fontSize: 12.0,
-                          color: Color(0xFF1548AD),
-                          fontFamily: 'Poppins'),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 20),
-              Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: Divider(),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 18.0),
-                      child: Text(
-                        'Ketentuan Aplikasi E-Badean',
-                        style: TextStyle(
-                          fontSize: 12.0,
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Divider(),
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return 'Password tidak boleh kosong';
+                        }
+                        if (value.length < 8) {
+                          return 'Password harus terdiri dari setidaknya 8 karakter';
+                        }
+                        return null; // Jika valid
+                      },
                     ),
                   ],
                 ),
-              ),
-              SizedBox(height: 20.0),
-              Text(
-                'Dengan masuk ke aplikasi E-Badean, kamu menyetujui segala Syarat dan Ketentuan dan Kebijakan Privasi E-Badean',
-                style: TextStyle(fontSize: 10.0, fontFamily: 'Poppins'),
-              ),
-              SizedBox(height: 80.0),
-              Divider(),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text("Belum punya akun?",
-                      style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.black,
-                          fontFamily: 'Poppins')),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/daftar');
-                    },
+                SizedBox(height: 20.0),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: _login,
                     child: Text(
-                      "Daftar di sini",
+                      "Masuk",
                       style: TextStyle(
-                          color: Color(0xFF1548AD),
-                          fontFamily: 'Poppins',
-                          fontSize: 12),
+                          fontSize: 16,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Poppins'),
                     ),
-                  )
-                ],
-              ),
-            ],
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: EdgeInsets.symmetric(vertical: 10),
+                      backgroundColor: Color(0xFF1548AD),
+                      minimumSize: Size(double.infinity, 0),
+                    ),
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/lupas');
+                      },
+                      child: Text(
+                        'Lupa Password ?',
+                        style: TextStyle(
+                            fontSize: 14.0,
+                            color: Color(0xFF1548AD),
+                            fontFamily: 'Poppins'),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 15.0),
+                Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Divider(),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 18.0),
+                        child: Text(
+                          'Ketentuan Aplikasi E-Badean',
+                          style: TextStyle(
+                            fontSize: 14.0,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Divider(),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 20.0),
+                Text(
+                  'Dengan masuk ke aplikasi E-Badean, kamu menyetujui segala Syarat dan Ketentuan dan Kebijakan Privasi E-Badean',
+                  style: TextStyle(fontSize: 13.0, fontFamily: 'Poppins'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      bottomNavigationBar: BottomAppBar(
+        child: Container(
+          height: 50.0,
+          child: SingleChildScrollView(
+            physics: NeverScrollableScrollPhysics(),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text("Belum punya akun?",
+                        style: TextStyle(
+                            fontSize: 14.0,
+                            color: Colors.black,
+                            fontFamily: 'Poppins')),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/daftar');
+                      },
+                      child: Text(
+                        "Daftar di sini",
+                        style: TextStyle(
+                            color: Color(0xFF1548AD),
+                            fontFamily: 'Poppins',
+                            fontSize: 14.0),
+                      ),
+                    )
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
