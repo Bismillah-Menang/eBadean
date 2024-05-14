@@ -56,7 +56,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
               decoration: InputDecoration(labelText: 'Phone Number'),
             ),
             TextField(
-              controller: phoneNumberController,
+              controller: alamatController,
               decoration: InputDecoration(labelText: 'Alamat'),
             ),
             SizedBox(height: 20),
