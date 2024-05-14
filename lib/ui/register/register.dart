@@ -207,7 +207,6 @@ class RegisterPage extends State<Register> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Registration Successful'),
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
@@ -230,12 +229,12 @@ class RegisterPage extends State<Register> {
       },
     ).then((_) {
       // Tampilkan notifikasi
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Registration Successful'),
-          duration: Duration(seconds: 2),
-        ),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(
+      //     content: Text('Registration Successful'),
+      //     duration: Duration(seconds: 2),
+      //   ),
+      // );
     });
   }
 
@@ -356,6 +355,7 @@ class RegisterPage extends State<Register> {
                 SizedBox(height: 20.0),
                 TextFormField(
                   controller: emailController,
+                  keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
                     labelText: 'Email',
                     labelStyle: TextStyle(fontSize: 14.0),
@@ -496,8 +496,7 @@ class RegisterPage extends State<Register> {
                       return 'Nomor telepon tidak boleh kosong';
                     }
                     // Regular expression untuk memeriksa format nomor telepon
-                    final RegExp phoneRegex =
-                        new RegExp(r"^(?:[+0]9)?[0-9]{10}$");
+                    final RegExp phoneRegex = new RegExp(r"^08[0-9]{8,11}$");
                     if (!phoneRegex.hasMatch(value)) {
                       return 'Nomor telepon tidak valid';
                     }

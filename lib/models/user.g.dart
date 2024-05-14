@@ -19,7 +19,7 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
       pekerjaan: json['pekerjaan'] as String?,
       status_nikah: json['status_nikah'] as String?,
       nik: json['nik'] as String?,
-    )..token = json['token'] as String?;
+    );
 
 Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'id': instance.id,
@@ -34,5 +34,4 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'pekerjaan': instance.pekerjaan,
       'status_nikah': instance.status_nikah,
       'nik': instance.nik,
-      'token': instance.token,
     };

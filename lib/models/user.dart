@@ -17,7 +17,6 @@ class User {
   late String? pekerjaan;
   late String? status_nikah;
   late String? nik;
-  late String? token;
 
   User({
     required this.id,

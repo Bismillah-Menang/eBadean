@@ -41,14 +41,8 @@ class DBHelper {
             pekerjaan TEXT,
             status_nikah TEXT,
             nik TEXT,
-            token TEXT 
           )
         ''');
-        },
-        onUpgrade: (db, oldVersion, newVersion) async {
-          if (oldVersion < 2) {
-            await db.execute('ALTER TABLE user ADD COLUMN token TEXT');
-          }
         },
       );
     } catch (e) {
@@ -86,6 +80,22 @@ class DBHelper {
     } catch (error) {
       print("Error fetching user from local database: $error");
       return null;
+    }
+  }
+
+  static Future<void> updateUser(User updatedUser, String token) async {
+    try {
+      final db = await database;
+      await db.update(
+        'user',
+        updatedUser.toJson(),
+        where:
+            'id = ?', 
+        whereArgs: [updatedUser.id], 
+      );
+    } catch (error) {
+      print("Error updating user: $error");
+      rethrow; 
     }
   }
 }

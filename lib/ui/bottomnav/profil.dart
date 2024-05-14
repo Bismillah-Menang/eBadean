@@ -1,8 +1,9 @@
 import 'package:e_badean/database/db_helper.dart';
 import 'package:e_badean/models/user.dart';
+import 'package:e_badean/ui/editprofil.dart';
+import 'package:e_badean/ui/login/login.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:e_badean/ui/login/login.dart';
 
 class Profil extends StatefulWidget {
   const Profil({Key? key}) : super(key: key);
@@ -12,6 +13,14 @@ class Profil extends StatefulWidget {
 }
 
 class _ProfilPageState extends State<Profil> {
+  User? _user;
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshProfileData();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -99,9 +108,42 @@ class _ProfilPageState extends State<Profil> {
                                   ),
                                   SizedBox(height: 30.0),
                                   ElevatedButton(
+                                    onPressed: () async {
+                                      // Navigator.push ke halaman EditProfilePage
+                                      final result = await Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              EditProfilePage(),
+                                        ),
+                                      );
+
+                                      if (result == true) {
+                                        _refreshProfileData();
+                                      }
+                                    },
+                                    child: Text(
+                                      "VERIFIKASI DATA",
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'Poppins'),
+                                    ),
+                                    style: ElevatedButton.styleFrom(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      padding:
+                                          EdgeInsets.symmetric(vertical: 10),
+                                      backgroundColor: Color(0xFF009688),
+                                      minimumSize: Size(double.infinity, 0),
+                                    ),
+                                  ),
+                                  ElevatedButton(
                                     onPressed: _logout,
                                     child: Text(
-                                      "Logout",
+                                      "LOGOUT",
                                       style: TextStyle(
                                           fontSize: 16,
                                           color: Colors.white,
@@ -141,6 +183,15 @@ class _ProfilPageState extends State<Profil> {
         ),
       ),
     );
+  }
+
+  void _refreshProfileData() async {
+    User? user = await _getUserFromLocal();
+    if (user != null) {
+      setState(() {
+        _user = user;
+      });
+    }
   }
 
   Future<User?> _getUserFromLocal() async {
