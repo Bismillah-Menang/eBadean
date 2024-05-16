@@ -37,10 +37,12 @@ dependencies:
   json_serializable: ^6.7.1
   shared_preferences: ^2.2.3
   sqflite: ^2.3.2
-  file_picker: ^8.0.3
+  file_picker: ^8.0.0+1
   fluttertoast: ^8.2.5
   mailer: ^6.1.0
   awesome_dialog: ^3.2.1
+  flutter_form_builder: ^9.2.1
+  form_builder_validators: ^9.1.0
 
 dev_dependencies:
   flutter_lints: ^2.0.0

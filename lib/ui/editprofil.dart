@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
 
 class EditProfilePage extends StatefulWidget {
   final VoidCallback? onProfileUpdated;
@@ -20,7 +21,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
   final TextEditingController userNameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneNumberController = TextEditingController();
+  final TextEditingController jeniskelaminController = TextEditingController();
   final TextEditingController alamatController = TextEditingController();
+  final TextEditingController tgllahirController = TextEditingController();
+  final TextEditingController kebangsaanController = TextEditingController();
+  final TextEditingController pekerjaanController = TextEditingController();
+  final TextEditingController statusnikahController = TextEditingController();
+  final TextEditingController nikController = TextEditingController();
 
   @override
   void initState() {
@@ -36,40 +43,290 @@ class _EditProfilePageState extends State<EditProfilePage> {
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextField(
-              controller: fullNameController,
-              decoration: InputDecoration(labelText: 'Fullname'),
-            ),
-            TextField(
-              controller: userNameController,
-              decoration: InputDecoration(labelText: 'Username'),
-            ),
-            TextField(
-              controller: emailController,
-              decoration: InputDecoration(labelText: 'Email'),
-            ),
-            TextField(
-              controller: phoneNumberController,
-              decoration: InputDecoration(labelText: 'Phone Number'),
-            ),
-            TextField(
-              controller: alamatController,
-              decoration: InputDecoration(labelText: 'Alamat'),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () async {
-                bool result = await _updateProfile();
-                if (result) {
-                  Navigator.pop(context, true);
-                }
-              },
-              child: Text('SAVE'),
-            ),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextField(
+                controller: fullNameController,
+                decoration: InputDecoration(
+                  labelText: 'Fullname',
+                  prefixIcon: Icon(Icons.person),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide(color: Colors.grey),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide(
+                      color: Color(0xFF1548AD),
+                    ),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(vertical: 10.0),
+                ),
+              ),
+              SizedBox(height: 20),
+              TextField(
+                controller: userNameController,
+                decoration: InputDecoration(
+                  labelText: 'Username',
+                  prefixIcon: Icon(Icons.account_circle),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide(color: Colors.grey),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide(
+                      color: Color(0xFF1548AD),
+                    ),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(vertical: 10.0),
+                ),
+              ),
+              SizedBox(height: 20),
+              TextField(
+                controller: emailController,
+                decoration: InputDecoration(
+                  labelText: 'Email',
+                  prefixIcon: Icon(Icons.email),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide(color: Colors.grey),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide(
+                      color: Color(0xFF1548AD),
+                    ),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(vertical: 10.0),
+                ),
+              ),
+              SizedBox(height: 20),
+              TextField(
+                controller: phoneNumberController,
+                decoration: InputDecoration(
+                  labelText: 'Phone Number',
+                  prefixIcon: Icon(Icons.phone),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide(color: Colors.grey),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide(
+                      color: Color(0xFF1548AD),
+                    ),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(vertical: 10.0),
+                ),
+              ),
+              SizedBox(height: 10),
+              TextFormField(
+                controller: jeniskelaminController,
+                decoration: InputDecoration(
+                  labelText: 'Jenis kelamin',
+                  prefixIcon: Icon(Icons.work),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide(color: Colors.grey),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide(
+                      color: Color(0xFF1548AD),
+                    ),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(vertical: 10.0),
+                ),
+                validator: (value) {
+                  if (value!.isEmpty) {
+                    return 'Jenis kelamin harus diisi';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 20),
+              TextField(
+                controller: alamatController,
+                decoration: InputDecoration(
+                  labelText: 'Alamat',
+                  prefixIcon: Icon(Icons.home),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide(color: Colors.grey),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide(
+                      color: Color(0xFF1548AD),
+                    ),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(vertical: 10.0),
+                ),
+              ),
+              SizedBox(height: 20),
+              InkWell(
+                onTap: () async {
+                  DateTime? pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(1900),
+                    lastDate: DateTime(2100),
+                  );
+
+                  if (pickedDate != null) {
+                    setState(() {
+                      tgllahirController.text =
+                          "${pickedDate.day}-${pickedDate.month}-${pickedDate.year}";
+                    });
+                  }
+                },
+                child: IgnorePointer(
+                  child: TextFormField(
+                    controller: tgllahirController,
+                    decoration: InputDecoration(
+                      labelText: 'Masukkan tanggal lahir',
+                      prefixIcon: Icon(Icons.calendar_today),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide: BorderSide(color: Colors.grey),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide: BorderSide(
+                          color: Color(0xFF1548AD),
+                        ),
+                      ),
+                      contentPadding: EdgeInsets.symmetric(vertical: 10.0),
+                    ),
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Tanggal lahir harus diisi';
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+              ),
+              SizedBox(height: 20),
+              TextFormField(
+                controller: kebangsaanController,
+                decoration: InputDecoration(
+                  labelText: 'Masukkan kebangsaan',
+                  prefixIcon: Icon(Icons.flag),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide(color: Colors.grey),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide(
+                      color: Color(0xFF1548AD),
+                    ),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(vertical: 10.0),
+                ),
+                validator: (value) {
+                  if (value!.isEmpty) {
+                    return 'Kebangsaan harus diisi';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 20),
+              TextFormField(
+                controller: pekerjaanController,
+                decoration: InputDecoration(
+                  labelText: 'Masukkan pekerjaan',
+                  prefixIcon: Icon(Icons.work),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide(color: Colors.grey),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide(
+                      color: Color(0xFF1548AD),
+                    ),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(vertical: 10.0),
+                ),
+                validator: (value) {
+                  if (value!.isEmpty) {
+                    return 'Pekerjaan harus diisi';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 20),
+              TextFormField(
+                controller: statusnikahController,
+                decoration: InputDecoration(
+                  labelText: 'Masukkan status pernikahan',
+                  prefixIcon: Icon(Icons.people),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide(color: Colors.grey),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide(
+                      color: Color(0xFF1548AD),
+                    ),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(vertical: 10.0),
+                ),
+                validator: (value) {
+                  if (value!.isEmpty) {
+                    return 'Status pernikahan harus diisi';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 20),
+              TextFormField(
+                controller: nikController,
+                decoration: InputDecoration(
+                  labelText: 'Masukkan NIK',
+                  prefixIcon: Icon(Icons.person),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide(color: Colors.grey),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide(
+                      color: Color(0xFF1548AD),
+                    ),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(vertical: 10.0),
+                ),
+                validator: (value) {
+                  if (value!.isEmpty) {
+                    return 'NIK harus diisi';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () async {
+                  bool result = await _updateProfile();
+                  if (result) {
+                    _showSuccessEdit();
+                    Navigator.pop(context, true);
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  primary: Color.fromRGBO(29, 216, 163, 80)// Warna latar belakang
+                  // Anda juga dapat mengatur warna lain seperti warna teks, bayangan, dll.
+                ),
+                child: Text('SAVE', style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -83,6 +340,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
         userNameController.text = user.username;
         emailController.text = user.email;
         phoneNumberController.text = user.no_hp ?? '';
+        jeniskelaminController.text = user.jenis_kelamin ?? '';
+        alamatController.text = user.alamat ?? '';
+        tgllahirController.text = user.ttl ?? '';
+        kebangsaanController.text = user.kebangsaan ?? '';
+        pekerjaanController.text = user.pekerjaan ?? '';
+        statusnikahController.text = user.status_nikah ?? '';
+        nikController.text = user.nik ?? '';
       });
     }
   }
@@ -116,7 +380,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
             'username': userNameController.text,
             'email': emailController.text,
             'no_hp': phoneNumberController.text,
+            'jenis_kelamin': jeniskelaminController.text,
             'alamat': alamatController.text,
+            'tanggal_lahir': tgllahirController.text,
+            'kebangsaan': kebangsaanController.text,
+            'pekerjaan': pekerjaanController.text,
+            'status_nikah': statusnikahController.text,
+            'nik': nikController.text
           }),
         );
 
@@ -138,6 +408,17 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
   }
 
+  void _showSuccessEdit() {
+    AwesomeDialog(
+      context: context,
+      dialogType: DialogType.success,
+      animType: AnimType.bottomSlide,
+      title: 'Profile Terbarui',
+      desc: 'Selamat profilmu sudah terbarui',
+      btnOkOnPress: () {},
+    )..show();
+  }
+
   Future<User?> _updateUserToLocal(String token) async {
     User? existingUser = await _getUserFromLocal();
     if (existingUser != null) {
@@ -147,17 +428,17 @@ class _EditProfilePageState extends State<EditProfilePage> {
         username: userNameController.text,
         email: emailController.text,
         no_hp: phoneNumberController.text,
-        alamat: existingUser.alamat,
-        jenis_kelamin: existingUser.jenis_kelamin,
-        ttl: existingUser.ttl,
-        kebangsaan: existingUser.kebangsaan,
-        pekerjaan: existingUser.pekerjaan,
-        status_nikah: existingUser.status_nikah,
-        nik: existingUser.nik,
+        alamat: alamatController.text,
+        jenis_kelamin: jeniskelaminController.text,
+        ttl: tgllahirController.text,
+        kebangsaan: kebangsaanController.text,
+        pekerjaan: pekerjaanController.text,
+        status_nikah: statusnikahController.text,
+        nik: nikController.text,
       );
 
       await DBHelper.updateUser(updatedUser, token);
-      _populateUserData();
+      await _populateUserData();
     }
   }
 }
