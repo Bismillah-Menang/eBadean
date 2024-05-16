@@ -99,7 +99,7 @@ class RegisterPage extends State<Register> {
           'password': password,
           'no_hp': phoneNumber,
           'alamat': address,
-          'jenid_kelamin': gender,
+          'jenis_kelamin': gender,
         }),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
@@ -533,8 +533,7 @@ class RegisterPage extends State<Register> {
                               Text(
                                 'Laki - Laki',
                                 style: TextStyle(
-                                  fontFamily:
-                                      'Poppins', // Atur font family menjadi Poppins
+                                  fontFamily: 'Poppins',
                                 ),
                               ),
                             ],
@@ -559,8 +558,7 @@ class RegisterPage extends State<Register> {
                               Text(
                                 'Perempuan',
                                 style: TextStyle(
-                                  fontFamily:
-                                      'Poppins', // Atur font family menjadi Poppins
+                                  fontFamily: 'Poppins',
                                 ),
                               ),
                             ],

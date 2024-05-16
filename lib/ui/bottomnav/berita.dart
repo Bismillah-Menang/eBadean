@@ -37,8 +37,17 @@ class _BeritaState extends State<Berita> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: FutureBuilder<BeritaList>(
+       body: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/berita7.png'),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+        FutureBuilder<BeritaList>(
           future: _beritaListFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -58,10 +67,12 @@ class _BeritaState extends State<Berita> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      SizedBox(height: 20,),
                       Center(
                         child: Text(
                           "Berita",
                           style: TextStyle(
+                            color: Colors.white,
                             fontSize: 20,
                             fontFamily: 'Poppins',
                             fontWeight: FontWeight.bold,
@@ -181,6 +192,7 @@ class _BeritaState extends State<Berita> {
             }
           },
         ),
+        ],
       ),
     );
   }

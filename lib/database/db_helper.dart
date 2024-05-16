@@ -83,7 +83,7 @@ class DBHelper {
     }
   }
 
-  static Future<void> updateUser(User updatedUser, String token) async {
+ static Future<void> updateUser(User updatedUser, String token) async {
     try {
       final db = await database;
       await db.update(

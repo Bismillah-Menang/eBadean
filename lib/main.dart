@@ -1,6 +1,7 @@
 import 'package:e_badean/ui/bottomnav/layanan.dart';
 import 'package:e_badean/ui/bottomnav/bottomnav.dart';
-import 'package:e_badean/ui/detail/detaillayanan.dart';
+import 'package:e_badean/ui/detail/surattidakmampu.dart';
+import 'package:e_badean/ui/detail/suratizinusaha.dart'; // Import the SuratIzinUsaha page
 import 'package:e_badean/ui/login/login.dart';
 import 'package:e_badean/ui/login/lupas.dart';
 import 'package:e_badean/ui/register/register.dart';
@@ -21,9 +22,6 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFF1548AD)),
         useMaterial3: true,
-        // textTheme: TextTheme(
-        //   bodyText1: TextStyle(fontFamily: 'Poppins'),
-        // ),
       ),
       debugShowCheckedModeBanner: false,
       initialRoute: '/',
@@ -33,7 +31,8 @@ class MyApp extends StatelessWidget {
         '/lupas': (context) => Lupas(),
         '/login': (context) => Login(),
         '/layanan': (context) => Layanan(),
-        '/detaillayanan': (context) => DetailLayanan(),
+        '/suratketerangantidakmampu': (context) => SuratKeteranganTidakMampu(),
+        '/suratizinusaha': (context) => SuratIzinUsaha(), // Add the new route here
         '/bottomnav': (context) => BottomNavBar(),
       },
     );

@@ -1,5 +1,6 @@
 import 'package:e_badean/database/db_helper.dart';
 import 'package:e_badean/models/user.dart';
+
 import 'package:e_badean/ui/editprofil.dart';
 import 'package:e_badean/ui/login/login.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +25,13 @@ class _ProfilPageState extends State<Profil> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/profile.png'),
+            fit: BoxFit.cover,
+          ),
+        ),
         child: Padding(
           padding: EdgeInsets.symmetric(
             vertical: 50.0,
@@ -36,14 +43,7 @@ class _ProfilPageState extends State<Profil> {
               Center(
                 child: Column(
                   children: [
-                    Text(
-                      "Profil Saya",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                   
                     SizedBox(height: 40.0),
                     FutureBuilder<User?>(
                       future: _getUserFromLocal(),
@@ -65,48 +65,7 @@ class _ProfilPageState extends State<Profil> {
                                       'https://miro.medium.com/v2/resize:fit:786/format:webp/1*DLJ3UGHPWDtrzfcMTYjfZw.jpeg',
                                     ),
                                   ),
-                                  SizedBox(height: 30.0),
-                                  Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: Text(
-                                      'Fullname: ${user.nama_lengkap}',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontFamily: 'Poppins',
-                                      ),
-                                    ),
-                                  ),
-                                  Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: Text(
-                                      'Email: ${user.email}',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontFamily: 'Poppins',
-                                      ),
-                                    ),
-                                  ),
-                                  Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: Text(
-                                      'No Telepon: ${user.no_hp}',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontFamily: 'Poppins',
-                                      ),
-                                    ),
-                                  ),
-                                  Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: Text(
-                                      'Alamat: ${user.alamat}',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontFamily: 'Poppins',
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(height: 30.0),
+                                  SizedBox(height: 40.0),
                                   ElevatedButton(
                                     onPressed: () async {
                                       // Navigator.push ke halaman EditProfilePage
@@ -140,6 +99,72 @@ class _ProfilPageState extends State<Profil> {
                                       minimumSize: Size(double.infinity, 0),
                                     ),
                                   ),
+                                  SizedBox(height: 30.0),
+                                  Column(
+                                    children: [
+                                      Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: Text(
+                                          'Fullname: ${user.nama_lengkap}',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontFamily: 'Poppins',
+                                          ),
+                                        ),
+                                      ),
+                                      Divider(), // Garis horizontal
+                                      // Widget berikutnya
+                                    ],
+                                  ),
+                                  Column(
+                                    children: [
+                                      Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: Text(
+                                          'Email: ${user.email}',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontFamily: 'Poppins',
+                                          ),
+                                        ),
+                                      ),
+                                      Divider(), // Garis horizontal
+                                      // Widget berikutnya
+                                    ],
+                                  ),
+                                  Column(
+                                    children: [
+                                      Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: Text(
+                                          'No Telepon: ${user.no_hp}',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontFamily: 'Poppins',
+                                          ),
+                                        ),
+                                      ),
+                                      Divider(), // Garis horizontal
+                                      // Widget berikutnya
+                                    ],
+                                  ),
+                                  Column(
+                                    children: [
+                                      Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: Text(
+                                          'Alamat: ${user.alamat}',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontFamily: 'Poppins',
+                                          ),
+                                        ),
+                                      ),
+                                      Divider(), // Garis horizontal
+                                      // Widget berikutnya
+                                    ],
+                                  ),
+                                  SizedBox(height: 30.0),
                                   ElevatedButton(
                                     onPressed: _logout,
                                     child: Text(
