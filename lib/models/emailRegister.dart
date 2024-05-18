@@ -10,6 +10,4 @@ class User {
     required this.email,
     required this.nama_akun,
   });
-
-  // Tambahkan kode lain yang diperlukan di sini
 }

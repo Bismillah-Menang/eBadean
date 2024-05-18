@@ -1,7 +1,6 @@
 import 'package:e_badean/database/db_helper.dart';
 import 'package:e_badean/models/user.dart';
-
-import 'package:e_badean/ui/editprofil.dart';
+import 'package:e_badean/ui/detail/editprofil.dart';
 import 'package:e_badean/ui/login/login.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -25,13 +24,7 @@ class _ProfilPageState extends State<Profil> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/images/profile.png'),
-            fit: BoxFit.cover,
-          ),
-        ),
+      body: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.symmetric(
             vertical: 50.0,
@@ -43,7 +36,6 @@ class _ProfilPageState extends State<Profil> {
               Center(
                 child: Column(
                   children: [
-                   
                     SizedBox(height: 40.0),
                     FutureBuilder<User?>(
                       future: _getUserFromLocal(),
@@ -68,7 +60,6 @@ class _ProfilPageState extends State<Profil> {
                                   SizedBox(height: 40.0),
                                   ElevatedButton(
                                     onPressed: () async {
-                                      // Navigator.push ke halaman EditProfilePage
                                       final result = await Navigator.push(
                                         context,
                                         MaterialPageRoute(
@@ -76,7 +67,6 @@ class _ProfilPageState extends State<Profil> {
                                               EditProfilePage(),
                                         ),
                                       );
-
                                       if (result == true) {
                                         _refreshProfileData();
                                       }
@@ -95,7 +85,8 @@ class _ProfilPageState extends State<Profil> {
                                       ),
                                       padding:
                                           EdgeInsets.symmetric(vertical: 10),
-                                      backgroundColor: Color(0xFF009688),
+                                      backgroundColor:
+                                          Color.fromRGBO(29, 216, 163, 80),
                                       minimumSize: Size(double.infinity, 0),
                                     ),
                                   ),
@@ -113,7 +104,6 @@ class _ProfilPageState extends State<Profil> {
                                         ),
                                       ),
                                       Divider(), // Garis horizontal
-                                      // Widget berikutnya
                                     ],
                                   ),
                                   Column(
@@ -129,7 +119,6 @@ class _ProfilPageState extends State<Profil> {
                                         ),
                                       ),
                                       Divider(), // Garis horizontal
-                                      // Widget berikutnya
                                     ],
                                   ),
                                   Column(
@@ -144,8 +133,7 @@ class _ProfilPageState extends State<Profil> {
                                           ),
                                         ),
                                       ),
-                                      Divider(), // Garis horizontal
-                                      // Widget berikutnya
+                                      Divider(), 
                                     ],
                                   ),
                                   Column(
@@ -161,7 +149,6 @@ class _ProfilPageState extends State<Profil> {
                                         ),
                                       ),
                                       Divider(), // Garis horizontal
-                                      // Widget berikutnya
                                     ],
                                   ),
                                   SizedBox(height: 30.0),
@@ -234,10 +221,8 @@ class _ProfilPageState extends State<Profil> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove('token');
 
-    // Hapus email terdaftar (opsional, tergantung kebutuhan aplikasi)
     await prefs.remove('registered_email');
 
-    // Navigasi ke halaman login dan hapus stack navigasi sebelumnya
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => Login()),

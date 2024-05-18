@@ -12,7 +12,7 @@ class User {
   late String? no_hp;
   late String? alamat;
   late String? jenis_kelamin;
-  late String? ttl;
+  late String? tanggal_lahir;
   late String? kebangsaan;
   late String? pekerjaan;
   late String? status_nikah;
@@ -26,7 +26,7 @@ class User {
     required this.no_hp,
     required this.alamat,
     required this.jenis_kelamin,
-    required this.ttl,
+    required this.tanggal_lahir,
     required this.kebangsaan,
     required this.pekerjaan,
     required this.status_nikah,
@@ -45,7 +45,7 @@ class User {
       'no_hp': no_hp,
       'alamat': alamat,
       'jenis_kelamin': jenis_kelamin,
-      'ttl': ttl,
+      'tanggal_lahir': tanggal_lahir,
       'kebangsaan': kebangsaan,
       'pekerjaan': pekerjaan,
       'status_nikah': status_nikah,

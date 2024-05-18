@@ -38,14 +38,6 @@ class _LayananPageState extends State<Layanan> {
     return Scaffold(
       body: Stack(
         children: [
-          Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/layanan3.png'),
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
           FutureBuilder<LayananList>(
             future: _layananListFuture,
             builder: (context, snapshot) {
@@ -58,20 +50,22 @@ class _LayananPageState extends State<Layanan> {
                 return SingleChildScrollView(
                   child: Padding(
                     padding: EdgeInsets.only(
-                      top: 20.0,
-                      bottom: 75.0,
+                      top: 35.0,
+                      bottom: 85.0,
                       left: 20.0,
                       right: 20.0,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(height: 20,),
+                        SizedBox(
+                          height: 20,
+                        ),
                         Center(
                           child: Text(
                             "Layanan",
                             style: TextStyle(
-                              color: Colors.white,
+                              color: Colors.black,
                               fontSize: 20,
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.bold,
@@ -102,7 +96,6 @@ class _LayananPageState extends State<Layanan> {
                             ),
                           ),
                         ),
-                        SizedBox(height: 25.0),
                         ListView.builder(
                           shrinkWrap: true,
                           physics: NeverScrollableScrollPhysics(),
@@ -113,62 +106,93 @@ class _LayananPageState extends State<Layanan> {
                               padding: EdgeInsets.only(bottom: 20.0),
                               child: InkWell(
                                 onTap: () {
-                                  print('Tapped on: ${layanan.nama_layanan}'); // Debug statement
-                                  // Navigate to different pages based on layanan.nama_layanan
-                                  if (layanan.nama_layanan == 'Surat Tidak Mampu') {
-                                    print('Navigating to /suratketerangantidakmampu'); // Debug statement
-                                    Navigator.pushNamed(context, '/suratketerangantidakmampu');
-                                    } else if (layanan.nama_layanan == 'Surat Izin Usaha') {
-                                    Navigator.pushNamed(context, '/suratizinusaha');
+                                  print('Tapped on: ${layanan.nama_layanan}');
+                                  if (layanan.nama_layanan ==
+                                      'Surat Tidak Mampu') {
+                                    Navigator.pushNamed(
+                                        context, '/suratketerangantidakmampu');
+                                  } else if (layanan.nama_layanan ==
+                                      'Surat Izin Usaha') {
+                                    Navigator.pushNamed(
+                                        context, '/suratizinusaha');
                                   } else {
-                                    print('No matching route for ${layanan.nama_layanan}'); // Debug statement
-                                    // Handle other types or show a message
+                                    print(
+                                        'No matching route for ${layanan.nama_layanan}'); // Debug statement
                                   }
                                 },
                                 borderRadius: BorderRadius.circular(15.0),
                                 child: Container(
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(15.0),
-                                    border: Border.all(
-                                      color: Colors.black.withOpacity(0.6),
-                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.5),
+                                        spreadRadius: 1,
+                                        blurRadius: 3,
+                                        offset: Offset(0, 2),
+                                      ),
+                                    ],
                                   ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(15.0),
-                                    child: Row(
-                                      children: [
-                                        CircleAvatar(
-                                          radius: 25,
-                                          backgroundColor: Color(0xFFEBF0FF),
-                                          child: Icon(
-                                            Icons.insert_drive_file,
-                                            color: Color(0xFF0046F8),
-                                          ),
-                                        ),
-                                        SizedBox(width: 15.0),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                layanan.nama_layanan,
-                                                style: TextStyle(
-                                                  fontFamily: 'Poppins',
-                                                  fontSize: 14.0,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
+                                  child: Material(
+                                    borderRadius: BorderRadius.circular(15.0),
+                                    color: Theme.of(context).backgroundColor,
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(15.0),
+                                      onTap: () {
+                                        if (layanan.nama_layanan ==
+                                            'Surat Tidak Mampu') {
+                                          Navigator.pushNamed(context,
+                                              '/suratketerangantidakmampu');
+                                        } else if (layanan.nama_layanan ==
+                                            'Surat Izin Usaha') {
+                                          Navigator.pushNamed(
+                                              context, '/suratizinusaha');
+                                        } else {
+                                          print(
+                                              'No matching route for ${layanan.nama_layanan}'); // Debug statement
+                                        }
+                                      },
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(15.0),
+                                        child: Row(
+                                          children: [
+                                            CircleAvatar(
+                                              radius: 25,
+                                              backgroundColor:
+                                                  Color(0xFFEBF0FF),
+                                              child: Icon(
+                                                Icons.insert_drive_file,
+                                                color: Color(0xFF0046F8),
                                               ),
-                                              Text(
-                                                layanan.info_layanan,
-                                                style: TextStyle(
-                                                  fontFamily: 'Poppins',
-                                                  fontSize: 12.0,
-                                                ),
+                                            ),
+                                            SizedBox(width: 15.0),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    layanan.nama_layanan,
+                                                    style: TextStyle(
+                                                      fontFamily: 'Poppins',
+                                                      fontSize: 14.0,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    layanan.info_layanan,
+                                                    style: TextStyle(
+                                                      fontFamily: 'Poppins',
+                                                      fontSize: 12.0,
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
-                                            ],
-                                          ),
+                                            ),
+                                          ],
                                         ),
-                                      ],
+                                      ),
                                     ),
                                   ),
                                 ),

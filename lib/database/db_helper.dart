@@ -26,7 +26,6 @@ class DBHelper {
         fullPath,
         version: 1,
         onCreate: (db, version) async {
-          // Mendefinisikan skema tabel jika database baru dibuat
           await db.execute('''
           CREATE TABLE user (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -36,11 +35,12 @@ class DBHelper {
             no_hp TEXT,
             alamat TEXT,
             jenis_kelamin TEXT,
-            ttl TEXT,
+            tanggal_lahir TEXT,
             kebangsaan TEXT,
             pekerjaan TEXT,
             status_nikah TEXT,
             nik TEXT,
+            token TEXT
           )
         ''');
         },
@@ -83,19 +83,18 @@ class DBHelper {
     }
   }
 
- static Future<void> updateUser(User updatedUser, String token) async {
+  static Future<void> updateUser(User updatedUser, String token) async {
     try {
       final db = await database;
       await db.update(
         'user',
         updatedUser.toJson(),
-        where:
-            'id = ?', 
-        whereArgs: [updatedUser.id], 
+        where: 'id = ?',
+        whereArgs: [updatedUser.id],
       );
     } catch (error) {
       print("Error updating user: $error");
-      rethrow; 
+      rethrow;
     }
   }
 }

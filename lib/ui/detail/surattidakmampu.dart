@@ -29,10 +29,9 @@ class _SuratKeteranganTidakMampuState extends State<SuratKeteranganTidakMampu> {
         setState(() {
           _name = user.nama_lengkap;
           _email = user.email;
-          _keterangan = ''; // Atur keterangan ke nilai default jika diperlukan
+          _keterangan = '';
           namaLengkapController.text = _name ?? '';
-          emailController.text =
-              _email ?? ''; // Ambil nilai email dan set pada emailController
+          emailController.text = _email ?? '';
         });
       }
     } else {
@@ -42,8 +41,7 @@ class _SuratKeteranganTidakMampuState extends State<SuratKeteranganTidakMampu> {
 
   Future<void> kirimFormulirKeServer(
       String name, String email, String keterangan) async {
-    final apiUrl = Uri.parse(
-        'http://alamat_server/kirim-formulir'); // Ganti dengan alamat server yang sesuai
+    final apiUrl = Uri.parse('${ApiConfig.baseUrl}/api/formulir');
     final headers = {'Content-Type': 'application/json'};
 
     final body = jsonEncode({
@@ -68,56 +66,139 @@ class _SuratKeteranganTidakMampuState extends State<SuratKeteranganTidakMampu> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Surat Keterangan Tidak Mampu')),
+      appBar: AppBar(
+        title: Text(
+          'Surat Tidak Mampu',
+          style: TextStyle(
+            fontSize: 18.0,
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+      ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 20.0),
         child: Form(
           key: _formKey,
           child: Column(
             children: <Widget>[
+              SizedBox(height: 20),
               TextFormField(
                 controller: namaLengkapController,
-                decoration: InputDecoration(labelText: 'Nama'),
+                decoration: InputDecoration(
+                  labelText: 'Nama',
+                  labelStyle: TextStyle(fontSize: 14.0),
+                  prefixIcon: Icon(Icons.person),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide(color: Colors.grey),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide(
+                      color: Color(0xFF1548AD),
+                    ),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(vertical: 10.0),
+                ),
                 validator: (value) =>
                     value!.isEmpty ? 'Nama tidak boleh kosong' : null,
                 onSaved: (value) => _name = value,
               ),
+              SizedBox(height: 20),
               TextFormField(
                 controller: emailController,
-                decoration: InputDecoration(labelText: 'Email'),
+                keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(
+                  labelText: 'Email',
+                  labelStyle: TextStyle(fontSize: 14.0),
+                  prefixIcon: Icon(Icons.mail),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide(color: Colors.grey),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide(
+                      color: Color(0xFF1548AD),
+                    ),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(vertical: 10.0),
+                ),
                 validator: (value) =>
                     value!.isEmpty ? 'Email tidak boleh kosong' : null,
                 onSaved: (value) => _email = value,
               ),
+              SizedBox(height: 20),
               TextFormField(
-                decoration:
-                    InputDecoration(labelText: 'Keterangan Tidak Mampu'),
+                keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(
+                  labelText: 'Keterangan',
+                  labelStyle: TextStyle(fontSize: 14.0),
+                  prefixIcon: Icon(Icons.message),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide(color: Colors.grey),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide(
+                      color: Color(0xFF1548AD),
+                    ),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(vertical: 10.0),
+                ),
                 validator: (value) =>
                     value!.isEmpty ? 'Keterangan tidak boleh kosong' : null,
                 onSaved: (value) => _keterangan = value,
               ),
               SizedBox(height: 20),
               ElevatedButton(
+                onPressed: () async {
+                  await _loadUserData();
+                },
+                child: Text(
+                  "TAMBAHKAN DATA DIRI",
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Poppins'),
+                ),
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  padding: EdgeInsets.symmetric(vertical: 10),
+                  backgroundColor: Color(0xFFFFF212),
+                  minimumSize: Size(double.infinity, 0),
+                ),
+              ),
+              SizedBox(height: 5),
+              ElevatedButton(
                 onPressed: () {
-                  // Isi nilai name, email, dan keterangan sesuai dengan data formulir yang ingin dikirim
                   String name = namaLengkapController.text;
                   String email = emailController.text;
-                  String keterangan = _keterangan ??
-                      ''; // Isi dengan nilai _keterangan atau string kosong jika null
-
-                  // Panggil fungsi kirimFormulirKeServer dengan data yang sesuai
+                  String keterangan = _keterangan ?? '';
                   kirimFormulirKeServer(name, email, keterangan);
                 },
-                child: Text('Kirim'),
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  await _loadUserData(); // Tambahkan pemanggilan _loadUserData() di sini
-                  // Setelah data pengguna dimuat, nilai _email akan terisi
-                  // Tetapkan nilai _email pada emailController
-                  // Tetapkan nilai email pada emailController
-                },
-                child: Text('Tambahkan Data Diri'),
+                child: Text(
+                  "KIRIM",
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Poppins'),
+                ),
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  padding: EdgeInsets.symmetric(vertical: 10),
+                  backgroundColor: Color.fromRGBO(29, 216, 163, 80),
+                  minimumSize: Size(double.infinity, 0),
+                ),
               ),
             ],
           ),

@@ -4,7 +4,8 @@ import 'dart:math';
 import 'package:mailer/mailer.dart';
 import 'package:http/http.dart' as http;
 import 'package:mailer/smtp_server/gmail.dart';
-import 'package:awesome_dialog/awesome_dialog.dart'; // Import package awesome_dialog
+import 'package:awesome_dialog/awesome_dialog.dart';
+import 'dart:async';
 
 class Lupas extends StatefulWidget {
   @override
@@ -22,6 +23,9 @@ class LupasPageState extends State<Lupas> {
 
   bool emailSent = false;
   bool otpVerified = false;
+  bool disableResendButton = false;
+  int resendCountdown = 0;
+  Timer? countdownTimer;
 
   String generateOTP() {
     int length = 6;
@@ -42,14 +46,14 @@ class LupasPageState extends State<Lupas> {
     final message = Message()
       ..from = Address('badeanassistance@gmail.com', 'Badean Assistance')
       ..recipients.add(recipientEmail)
-      ..subject = 'Verification Code for Your App'
-      ..text = 'Your verification code is: $verificationCode';
+      ..subject = 'Kode OTP untuk aplikasi E-Badean'
+      ..text = '$verificationCode adalah kode verifikasi Anda. Demi keamanan, jangan bagikan kode ini.';
 
     try {
       final sendReport = await send(message, smtpServer);
       print('Message sent: ' + sendReport.toString());
       setState(() {
-        generatedOTP = verificationCode; // Simpan nilai OTP yang dihasilkan
+        generatedOTP = verificationCode; 
       });
     } catch (e) {
       print('Error sending email: $e');
@@ -176,14 +180,12 @@ class LupasPageState extends State<Lupas> {
                     child: ElevatedButton(
                       onPressed: () {
                         String enteredOTP = otpController.text;
-                        String expectedOTP =
-                            generatedOTP; // Simpan nilai OTP yang dihasilkan sebelumnya
+                        String expectedOTP = generatedOTP;
                         if (enteredOTP == expectedOTP) {
                           setState(() {
                             otpVerified = true;
                           });
                         } else {
-                          // Tampilkan pesan kesalahan atau umpan balik lainnya
                           AwesomeDialog(
                             context: context,
                             dialogType: DialogType.error,
@@ -213,7 +215,7 @@ class LupasPageState extends State<Lupas> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        padding: EdgeInsets.symmetric(vertical: 15),
+                        padding: EdgeInsets.symmetric(vertical: 10),
                         backgroundColor: Color(0xFF1548AD),
                         minimumSize: Size(double.infinity, 0),
                       ),
@@ -240,7 +242,7 @@ class LupasPageState extends State<Lupas> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(15),
                           borderSide: BorderSide(
                             color: Color(0xFF1548AD),
                           ),
@@ -280,17 +282,35 @@ class LupasPageState extends State<Lupas> {
             if (!otpVerified)
               Center(
                 child: ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      emailSent = true;
-                    });
-                    String recipientEmail = emailController
-                        .text; // Mengambil alamat email dari controller
-                    sendVerificationEmail(recipientEmail,
-                        generateOTP()); // Menggunakan alamat email yang diambil
-                  },
+                  onPressed: disableResendButton
+                      ? null
+                      : () {
+                          setState(() {
+                            emailSent = true;
+                            disableResendButton = true;
+                            resendCountdown = 60;
+                          });
+                          String recipientEmail = emailController.text;
+                          sendVerificationEmail(recipientEmail, generateOTP());
+
+                          countdownTimer =
+                              Timer.periodic(Duration(seconds: 1), (timer) {
+                            setState(() {
+                              if (resendCountdown > 0) {
+                                resendCountdown--;
+                              } else {
+                                timer.cancel();
+                                disableResendButton = false;
+                              }
+                            });
+                          });
+                        },
                   child: Text(
-                    emailSent ? "Kirim Ulang OTP" : "Kirim OTP",
+                    emailSent
+                        ? (disableResendButton
+                            ? "Kirim Ulang OTP ($resendCountdown)"
+                            : "Kirim Ulang OTP")
+                        : "Kirim OTP",
                     style: TextStyle(
                         fontSize: 16,
                         color: Colors.white,

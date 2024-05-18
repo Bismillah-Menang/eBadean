@@ -37,161 +37,161 @@ class _BeritaState extends State<Berita> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-       body: Stack(
+      body: Stack(
         children: [
-          Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/berita7.png'),
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-        FutureBuilder<BeritaList>(
-          future: _beritaListFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
-            } else {
-              final beritaList = snapshot.data!;
-              return SingleChildScrollView(
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    top: 20.0,
-                    bottom: 75.0,
-                    left: 20.0,
-                    right: 20.0,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(height: 20,),
-                      Center(
-                        child: Text(
-                          "Berita",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 20.0),
-                      Container(
-                        height: 40.0,
-                        decoration: BoxDecoration(
-                          color: Color(0xFFEEEDF3),
-                          borderRadius: BorderRadius.circular(20.0),
-                        ),
-                        child: TextField(
-                          decoration: InputDecoration(
-                            hintText: 'Cari berita',
-                            hintStyle: TextStyle(
-                              color: Colors.grey[700],
+          FutureBuilder<BeritaList>(
+            future: _beritaListFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              } else {
+                final beritaList = snapshot.data!;
+                return SingleChildScrollView(
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      top: 35.0,
+                      bottom: 85.0,
+                      left: 20.0,
+                      right: 20.0,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(height: 20),
+                        Center(
+                          child: Text(
+                            "Berita",
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 20,
                               fontFamily: 'Poppins',
-                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
                             ),
-                            border: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 15.0,
-                              vertical: 13.5,
-                            ),
-                            prefixIcon: Icon(Icons.search),
                           ),
                         ),
-                      ),
-                      SizedBox(height: 25.0),
-                      ListView.builder(
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        itemCount: beritaList.data?.length,
-                        itemBuilder: (context, index) {
-                          final berita = beritaList.data![index];
-                          return Padding(
-                            padding: EdgeInsets.only(bottom: 20.0),
-                            child: InkWell(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => DetailBerita(
-                                      judul: berita.judul_berita,
-                                      tgl: berita.tgl_berita,
-                                      isi: berita.isi_berita,
-                                      foto: berita.foto_berita,
-                                    ),
-                                  ),
-                                );
-                              },
-                              borderRadius: BorderRadius.circular(15.0),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(15.0),
-                                  border: Border.all(
-                                    color: Colors.black.withOpacity(0.6),
-                                  ),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(15.0),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        width: 65.0,
-                                        height: 60.0,
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(10.0),
-                                        ),
-                                        clipBehavior: Clip.antiAlias,
-                                        child: Image.memory(
-                                          berita.foto_berita,
-                                          fit: BoxFit
-                                              .cover, // Sesuaikan dengan kebutuhan Anda
-                                        ),
+                        SizedBox(height: 20.0),
+                        Container(
+                          height: 40.0,
+                          decoration: BoxDecoration(
+                            color: Color(0xFFEEEDF3),
+                            borderRadius: BorderRadius.circular(20.0),
+                          ),
+                          child: TextField(
+                            decoration: InputDecoration(
+                              hintText: 'Cari berita',
+                              hintStyle: TextStyle(
+                                color: Colors.grey[700],
+                                fontFamily: 'Poppins',
+                                fontSize: 14,
+                              ),
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 15.0,
+                                vertical: 13.5,
+                              ),
+                              prefixIcon: Icon(Icons.search),
+                            ),
+                          ),
+                        ),
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          itemCount: beritaList.data?.length,
+                          itemBuilder: (context, index) {
+                            final berita = beritaList.data![index];
+                            return Padding(
+                              padding: EdgeInsets.only(bottom: 20.0),
+                              child: InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => DetailBerita(
+                                        judul: berita.judul_berita,
+                                        tgl: berita.tgl_berita,
+                                        isi: berita.isi_berita,
+                                        foto: berita.foto_berita,
                                       ),
-                                      SizedBox(width: 15.0),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              berita.judul_berita,
-                                              style: TextStyle(
-                                                fontFamily: 'Poppins',
-                                                fontSize: 14.0,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            SizedBox(height: 5.0),
-                                            Text(
-                                              berita.tgl_berita,
-                                              style: TextStyle(
-                                                fontFamily: 'Poppins',
-                                                fontSize: 12.0,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
+                                    ),
+                                  );
+                                },
+                                borderRadius: BorderRadius.circular(15.0),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(15.0),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.5),
+                                        spreadRadius: 1,
+                                        blurRadius: 3,
+                                        offset: Offset(0, 2),
                                       ),
                                     ],
                                   ),
+                                  child: Material(
+                                    borderRadius: BorderRadius.circular(15.0),
+                                    color: Theme.of(context).backgroundColor,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(15.0),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            width: 65.0,
+                                            height: 60.0,
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(10.0),
+                                            ),
+                                            clipBehavior: Clip.antiAlias,
+                                            child: Image.memory(
+                                              berita.foto_berita,
+                                              fit: BoxFit
+                                                  .cover, // Sesuaikan dengan kebutuhan Anda
+                                            ),
+                                          ),
+                                          SizedBox(width: 15.0),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  berita.judul_berita,
+                                                  style: TextStyle(
+                                                    fontFamily: 'Poppins',
+                                                    fontSize: 14.0,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                                SizedBox(height: 5.0),
+                                                Text(
+                                                  berita.tgl_berita,
+                                                  style: TextStyle(
+                                                    fontFamily: 'Poppins',
+                                                    fontSize: 12.0,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
-                          );
-                        },
-                      ),
-                    ],
+                            );
+                          },
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              );
-            }
-          },
-        ),
+                );
+              }
+            },
+          ),
         ],
       ),
     );

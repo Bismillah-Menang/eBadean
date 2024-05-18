@@ -164,9 +164,18 @@ class _HomeState extends State<Home> {
                                 Layanan layanan = layananData[index];
                                 return RoundedIconButton(
                                   onTap: () {
-                                    Navigator.pushNamed(
-                                        context, '/detaillayanan',
-                                        arguments: layanan.nama_layanan);
+                                    if (layanan.nama_layanan ==
+                                        'Surat Tidak Mampu') {
+                                      Navigator.pushNamed(context,
+                                          '/suratketerangantidakmampu');
+                                    } else if (layanan.nama_layanan ==
+                                        'Surat Izin Usaha') {
+                                      Navigator.pushNamed(
+                                          context, '/suratizinusaha');
+                                    } else {
+                                      print(
+                                          'No matching route for ${layanan.nama_layanan}');
+                                    }
                                   },
                                   icon: Icon(Icons.insert_drive_file,
                                       size: 30.0, color: Color(0xFF0046F8)),
@@ -247,54 +256,64 @@ class _HomeState extends State<Home> {
                                 child: Container(
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(15.0),
-                                    border: Border.all(
-                                      color: Colors.black.withOpacity(0.6),
-                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.5),
+                                        spreadRadius: 1,
+                                        blurRadius: 3,
+                                        offset: Offset(0, 2),
+                                      ),
+                                    ],
                                   ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(15.0),
-                                    child: Row(
-                                      children: [
-                                        Container(
-                                          width: 65.0,
-                                          height: 60.0,
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(10.0),
+                                  child: Material(
+                                    borderRadius: BorderRadius.circular(15.0),
+                                    color: Theme.of(context).backgroundColor,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(15.0),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            width: 65.0,
+                                            height: 60.0,
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(10.0),
+                                            ),
+                                            clipBehavior: Clip.antiAlias,
+                                            child: Image.memory(
+                                              berita.foto_berita,
+                                              fit: BoxFit
+                                                  .cover, // Sesuaikan dengan kebutuhan Anda
+                                            ),
                                           ),
-                                          clipBehavior: Clip.antiAlias,
-                                          child: Image.memory(
-                                            berita.foto_berita,
-                                            fit: BoxFit
-                                                .cover, // Sesuaikan dengan kebutuhan Anda
-                                          ),
-                                        ),
-                                        SizedBox(width: 15.0),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                berita.judul_berita,
-                                                style: TextStyle(
-                                                  fontFamily: 'Poppins',
-                                                  fontSize: 14.0,
-                                                  fontWeight: FontWeight.bold,
+                                          SizedBox(width: 15.0),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  berita.judul_berita,
+                                                  style: TextStyle(
+                                                    fontFamily: 'Poppins',
+                                                    color: Colors.grey[700],
+                                                    fontSize: 13.5,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
                                                 ),
-                                              ),
-                                              SizedBox(height: 5.0),
-                                              Text(
-                                                '${berita.tgl_berita}',
-                                                style: TextStyle(
-                                                  fontFamily: 'Poppins',
-                                                  fontSize: 12.0,
+                                                SizedBox(height: 5.0),
+                                                Text(
+                                                  '${berita.tgl_berita}',
+                                                  style: TextStyle(
+                                                    fontFamily: 'Poppins',
+                                                    fontSize: 12.0,
+                                                  ),
                                                 ),
-                                              ),
-                                            ],
+                                              ],
+                                            ),
                                           ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
