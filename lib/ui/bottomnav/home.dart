@@ -14,6 +14,11 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
   Future<LayananList> fetchLayanan() async {
     final response =
         await http.get(Uri.parse('${ApiConfig.baseUrl}/api/layanan'));
@@ -44,288 +49,301 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.only(
-              top: 20.0,
-              bottom: 75.0,
-              left: 20.0,
-              right: 20.0,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    margin: EdgeInsets.only(bottom: 10.0),
-                    child: Image.asset(
-                      'assets/images/badean_splash.png',
-                      width: 245.0,
-                      height: 45.0,
+        child: RefreshIndicator(
+          onRefresh: () async {
+            setState(() {
+              fetchLayanan();
+              fetchBerita();
+            });
+          },
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.only(
+                top: 20.0,
+                bottom: 75.0,
+                left: 20.0,
+                right: 20.0,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      margin: EdgeInsets.only(bottom: 10.0),
+                      child: Image.asset(
+                        'assets/images/badean_splash.png',
+                        width: 245.0,
+                        height: 45.0,
+                      ),
                     ),
                   ),
-                ),
-                Center(
-                  child: Stack(
-                    children: [
-                      Image.asset(
-                        'assets/images/selamat_datang.png',
-                        width: 460.0,
-                        height: 190.0,
-                      ),
-                      Positioned(
-                        left: 18,
-                        right: 18,
-                        top: 120.0,
-                        child: Container(
-                          height: 40.0,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20.0),
-                          ),
-                          child: TextField(
-                            decoration: InputDecoration(
-                              hintText: 'Cari',
-                              border: InputBorder.none,
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 15.0,
-                                vertical: 11.0,
+                  Center(
+                    child: Stack(
+                      children: [
+                        Image.asset(
+                          'assets/images/selamat_datang.png',
+                          width: 460.0,
+                          height: 190.0,
+                        ),
+                        Positioned(
+                          left: 18,
+                          right: 18,
+                          top: 120.0,
+                          child: Container(
+                            height: 40.0,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20.0),
+                            ),
+                            child: TextField(
+                              decoration: InputDecoration(
+                                hintText: 'Cari',
+                                border: InputBorder.none,
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 15.0,
+                                  vertical: 11.0,
+                                ),
+                                prefixIcon: Icon(Icons.search),
                               ),
-                              prefixIcon: Icon(Icons.search),
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                SizedBox(height: 5.0),
-                Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(right: 15.0),
-                            child: Text(
-                              'Pelayanan',
-                              style: TextStyle(
-                                fontSize: 14.0,
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF000000),
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: Divider(
-                              thickness: 1.5,
-                              color: Color(0xFF0046F8),
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pushNamed(context, '/layanan');
-                            },
-                            child: Text(
-                              "Lihat Semua",
-                              style: TextStyle(
-                                  color: Colors.black,
+                  SizedBox(height: 5.0),
+                  Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(right: 15.0),
+                              child: Text(
+                                'Pelayanan',
+                                style: TextStyle(
+                                  fontSize: 16.0,
                                   fontFamily: 'Poppins',
-                                  fontSize: 12),
-                            ),
-                          ),
-                        ],
-                      ),
-                      FutureBuilder<LayananList>(
-                        future: fetchLayanan(),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return CircularProgressIndicator();
-                          } else if (snapshot.hasError) {
-                            return Text('Error: ${snapshot.error}');
-                          } else {
-                            final layananData =
-                                snapshot.data?.data?.take(8).toList() ?? [];
-                            return GridView.builder(
-                              shrinkWrap: true,
-                              padding: EdgeInsets.only(top: 5.0, bottom: 20.0),
-                              gridDelegate:
-                                  SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 4,
-                                mainAxisSpacing: 15.0,
-                                crossAxisSpacing: 12.0,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF000000),
+                                ),
                               ),
-                              itemCount: layananData.length,
-                              itemBuilder: (context, index) {
-                                Layanan layanan = layananData[index];
-                                return RoundedIconButton(
-                                  onTap: () {
-                                    if (layanan.nama_layanan ==
-                                        'Surat Tidak Mampu') {
-                                      Navigator.pushNamed(context,
-                                          '/suratketerangantidakmampu');
-                                    } else if (layanan.nama_layanan ==
-                                        'Surat Izin Usaha') {
-                                      Navigator.pushNamed(
-                                          context, '/suratizinusaha');
-                                    } else {
-                                      print(
-                                          'No matching route for ${layanan.nama_layanan}');
-                                    }
-                                  },
-                                  icon: Icon(Icons.insert_drive_file,
-                                      size: 30.0, color: Color(0xFF0046F8)),
-                                  color: Color(0xFFEBF0FF),
-                                  label: layanan.nama_layanan,
-                                );
+                            ),
+                            Expanded(
+                              child: Divider(
+                                thickness: 1.5,
+                                color: Color(0xFF0046F8),
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pushNamed(context, '/layanan');
                               },
-                            );
-                          }
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 10.0),
-                Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(right: 15.0),
-                            child: Text(
-                              'Rekomendasi Berita',
-                              style: TextStyle(
-                                fontSize: 14.0,
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF000000),
+                              child: Text(
+                                "Lihat Semua",
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontFamily: 'Poppins',
+                                    fontSize: 12),
                               ),
                             ),
-                          ),
-                          Expanded(
-                            child: Divider(
-                              thickness: 1.5,
-                              color: Color(0xFF0046F8),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 20.0),
-                FutureBuilder<BeritaList>(
-                  future: fetchBerita(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
-                    } else if (snapshot.hasError) {
-                      return Center(child: Text('Error: ${snapshot.error}'));
-                    } else {
-                      final beritaList = snapshot.data!;
-                      return SingleChildScrollView(
-                        physics: NeverScrollableScrollPhysics(),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: beritaList.data!.map((berita) {
-                            return Padding(
-                              padding: EdgeInsets.only(bottom: 20.0),
-                              child: InkWell(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => DetailBerita(
-                                        judul: berita.judul_berita,
-                                        tgl: berita.tgl_berita,
-                                        isi: berita.isi_berita,
-                                        foto: berita.foto_berita,
-                                      ),
-                                    ),
-                                  );
-                                },
-                                borderRadius: BorderRadius.circular(15.0),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(15.0),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.grey.withOpacity(0.5),
-                                        spreadRadius: 1,
-                                        blurRadius: 3,
-                                        offset: Offset(0, 2),
-                                      ),
-                                    ],
+                          ],
+                        ),
+                        FutureBuilder<LayananList>(
+                          future: fetchLayanan(),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return CircularProgressIndicator();
+                            } else if (snapshot.hasError) {
+                              return Text('Error: ${snapshot.error}');
+                            } else {
+                              final layananData =
+                                  snapshot.data?.data?.take(8).toList() ?? [];
+                              return SingleChildScrollView(
+                                physics: NeverScrollableScrollPhysics(),
+                                child: GridView.builder(
+                                  shrinkWrap: true,
+                                  padding:
+                                      EdgeInsets.only(top: 5.0, bottom: 20.0),
+                                  gridDelegate:
+                                      SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 4,
+                                    mainAxisSpacing: 15.0,
+                                    crossAxisSpacing: 12.0,
                                   ),
-                                  child: Material(
-                                    borderRadius: BorderRadius.circular(15.0),
-                                    color: Theme.of(context).backgroundColor,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(15.0),
-                                      child: Row(
-                                        children: [
-                                          Container(
-                                            width: 65.0,
-                                            height: 60.0,
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(10.0),
+                                  itemCount: layananData.length,
+                                  itemBuilder: (context, index) {
+                                    Layanan layanan = layananData[index];
+                                    return RoundedIconButton(
+                                      onTap: () {
+                                        if (layanan.nama_layanan ==
+                                            'Surat Tidak Mampu') {
+                                          Navigator.pushNamed(context,
+                                              '/suratketerangantidakmampu');
+                                        } else if (layanan.nama_layanan ==
+                                            'Surat Izin Usaha') {
+                                          Navigator.pushNamed(
+                                              context, '/suratizinusaha');
+                                        } else {
+                                          print(
+                                              'No matching route for ${layanan.nama_layanan}');
+                                        }
+                                      },
+                                      icon: Icon(Icons.insert_drive_file,
+                                          size: 30.0, color: Color(0xFF0046F8)),
+                                      color: Color(0xFFEBF0FF),
+                                      label: layanan.nama_layanan,
+                                    );
+                                  },
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 10.0),
+                  Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(right: 15.0),
+                              child: Text(
+                                'Rekomendasi Berita',
+                                style: TextStyle(
+                                  fontSize: 16.0,
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF000000),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Divider(
+                                thickness: 1.5,
+                                color: Color(0xFF0046F8),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 20.0),
+                  FutureBuilder<BeritaList>(
+                    future: fetchBerita(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(child: CircularProgressIndicator());
+                      } else if (snapshot.hasError) {
+                        return Center(child: Text('Error: ${snapshot.error}'));
+                      } else {
+                        final beritaList = snapshot.data!;
+                        return SingleChildScrollView(
+                          physics: NeverScrollableScrollPhysics(),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: beritaList.data!.map((berita) {
+                              return Padding(
+                                padding: EdgeInsets.only(bottom: 20.0),
+                                child: InkWell(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => DetailBerita(
+                                          judul: berita.judul_berita,
+                                          tgl: berita.tgl_berita,
+                                          isi: berita.isi_berita,
+                                          foto: berita.foto_berita,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  borderRadius: BorderRadius.circular(15.0),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(15.0),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.grey.withOpacity(0.5),
+                                          spreadRadius: 1,
+                                          blurRadius: 3,
+                                          offset: Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Material(
+                                      borderRadius: BorderRadius.circular(15.0),
+                                      color: Theme.of(context).backgroundColor,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(15.0),
+                                        child: Row(
+                                          children: [
+                                            Container(
+                                              width: 65.0,
+                                              height: 60.0,
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(10.0),
+                                              ),
+                                              clipBehavior: Clip.antiAlias,
+                                              child: Image.memory(
+                                                berita.foto_berita,
+                                                fit: BoxFit
+                                                    .cover, // Sesuaikan dengan kebutuhan Anda
+                                              ),
                                             ),
-                                            clipBehavior: Clip.antiAlias,
-                                            child: Image.memory(
-                                              berita.foto_berita,
-                                              fit: BoxFit
-                                                  .cover, // Sesuaikan dengan kebutuhan Anda
-                                            ),
-                                          ),
-                                          SizedBox(width: 15.0),
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  berita.judul_berita,
-                                                  style: TextStyle(
-                                                    fontFamily: 'Poppins',
-                                                    color: Colors.grey[700],
-                                                    fontSize: 13.5,
-                                                    fontWeight: FontWeight.bold,
+                                            SizedBox(width: 15.0),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    berita.judul_berita,
+                                                    style: TextStyle(
+                                                      fontFamily: 'Poppins',
+                                                      color: Colors.black,
+                                                      fontSize: 14.0,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
                                                   ),
-                                                ),
-                                                SizedBox(height: 5.0),
-                                                Text(
-                                                  '${berita.tgl_berita}',
-                                                  style: TextStyle(
-                                                    fontFamily: 'Poppins',
-                                                    fontSize: 12.0,
+                                                  SizedBox(height: 5.0),
+                                                  Text(
+                                                    '${berita.tgl_berita}',
+                                                    style: TextStyle(
+                                                      fontFamily: 'Poppins',
+                                                      fontSize: 12.0,
+                                                    ),
                                                   ),
-                                                ),
-                                              ],
+                                                ],
+                                              ),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      );
-                    }
-                  },
-                ),
-              ],
+                              );
+                            }).toList(),
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
         ),

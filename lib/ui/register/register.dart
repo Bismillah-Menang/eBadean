@@ -518,14 +518,14 @@ class RegisterPage extends State<Register> {
                         GestureDetector(
                           onTap: () {
                             setState(() {
-                              selectedGender = 'Laki-laki';
+                              selectedGender = 'laki-laki';
                             });
                           },
                           child: Row(
                             children: [
                               CircleAvatar(
                                 radius: 10,
-                                backgroundColor: selectedGender == 'Laki-laki'
+                                backgroundColor: selectedGender == 'laki-laki'
                                     ? Color.fromRGBO(29, 216, 163, 80)
                                     : Colors.grey,
                               ),
@@ -543,14 +543,14 @@ class RegisterPage extends State<Register> {
                         GestureDetector(
                           onTap: () {
                             setState(() {
-                              selectedGender = 'Perempuan';
+                              selectedGender = 'perempuan';
                             });
                           },
                           child: Row(
                             children: [
                               CircleAvatar(
                                 radius: 10,
-                                backgroundColor: selectedGender == 'Perempuan'
+                                backgroundColor: selectedGender == 'perempuan'
                                     ? Color.fromRGBO(29, 216, 163, 80)
                                     : Colors.grey,
                               ),

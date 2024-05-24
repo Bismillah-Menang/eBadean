@@ -6,7 +6,6 @@ import 'package:http/http.dart' as http;
 import 'package:e_badean/ip.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class Login extends StatefulWidget {
   @override
@@ -190,17 +189,6 @@ class LoginPageState extends State<Login> {
       btnOkOnPress: () {
         Navigator.pushNamed(context, '/bottomnav');
       },
-      // body: Column(
-      //   crossAxisAlignment: CrossAxisAlignment.start,
-      //   children: [
-      //     SizedBox(height: 10),
-      //     Text("Data Pengguna:"),
-      //     Text("Email: ${user.email}"),
-      //     Text("Username: ${user.username}"),
-      //     Text("Lahir: ${user.tanggal_lahir}"),
-      //     Text("Token: $token"),
-      //   ],
-      // ),
     )..show();
   }
 
@@ -212,7 +200,7 @@ class LoginPageState extends State<Login> {
           SingleChildScrollView(
             physics: NeverScrollableScrollPhysics(),
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 120.0),
+              padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 130.0),
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -367,9 +355,8 @@ class LoginPageState extends State<Login> {
             Container(
               color: Colors.black54,
               child: Center(
-                child: SpinKitFadingCircle(
-                  color: Colors.grey,
-                  size: 50.0,
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.grey),
                 ),
               ),
             ),

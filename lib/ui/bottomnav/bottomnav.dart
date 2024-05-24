@@ -18,7 +18,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
     Home(),
     Berita(),
     Layanan(),
-    Riwayat(),
+    RiwayatPage(),
     Profil(),
   ];
 

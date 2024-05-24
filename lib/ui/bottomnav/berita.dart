@@ -37,9 +37,14 @@ class _BeritaState extends State<Berita> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          FutureBuilder<BeritaList>(
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: () async {
+            setState(() {
+              _beritaListFuture = fetchData();
+            });
+          },
+          child: FutureBuilder<BeritaList>(
             future: _beritaListFuture,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -49,9 +54,10 @@ class _BeritaState extends State<Berita> {
               } else {
                 final beritaList = snapshot.data!;
                 return SingleChildScrollView(
+                  physics: AlwaysScrollableScrollPhysics(),
                   child: Padding(
                     padding: EdgeInsets.only(
-                      top: 35.0,
+                      top: 20.0,
                       bottom: 85.0,
                       left: 20.0,
                       right: 20.0,
@@ -59,7 +65,6 @@ class _BeritaState extends State<Berita> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(height: 20),
                         Center(
                           child: Text(
                             "Berita",
@@ -80,7 +85,7 @@ class _BeritaState extends State<Berita> {
                           ),
                           child: TextField(
                             decoration: InputDecoration(
-                              hintText: 'Cari berita',
+                              hintText: 'Cari Berita',
                               hintStyle: TextStyle(
                                 color: Colors.grey[700],
                                 fontFamily: 'Poppins',
@@ -95,6 +100,7 @@ class _BeritaState extends State<Berita> {
                             ),
                           ),
                         ),
+                        SizedBox(height: 35.0),
                         ListView.builder(
                           shrinkWrap: true,
                           physics: NeverScrollableScrollPhysics(),
@@ -192,7 +198,7 @@ class _BeritaState extends State<Berita> {
               }
             },
           ),
-        ],
+        ),
       ),
     );
   }

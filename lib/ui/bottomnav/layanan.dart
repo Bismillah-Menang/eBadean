@@ -36,9 +36,14 @@ class _LayananPageState extends State<Layanan> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          FutureBuilder<LayananList>(
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: () async {
+            setState(() {
+              _layananListFuture = fetchData();
+            });
+          },
+          child: FutureBuilder<LayananList>(
             future: _layananListFuture,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -50,7 +55,7 @@ class _LayananPageState extends State<Layanan> {
                 return SingleChildScrollView(
                   child: Padding(
                     padding: EdgeInsets.only(
-                      top: 35.0,
+                      top: 20.0,
                       bottom: 85.0,
                       left: 20.0,
                       right: 20.0,
@@ -58,9 +63,6 @@ class _LayananPageState extends State<Layanan> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(
-                          height: 20,
-                        ),
                         Center(
                           child: Text(
                             "Layanan",
@@ -96,6 +98,7 @@ class _LayananPageState extends State<Layanan> {
                             ),
                           ),
                         ),
+                        SizedBox(height: 35.0),
                         ListView.builder(
                           shrinkWrap: true,
                           physics: NeverScrollableScrollPhysics(),
@@ -105,21 +108,6 @@ class _LayananPageState extends State<Layanan> {
                             return Padding(
                               padding: EdgeInsets.only(bottom: 20.0),
                               child: InkWell(
-                                onTap: () {
-                                  print('Tapped on: ${layanan.nama_layanan}');
-                                  if (layanan.nama_layanan ==
-                                      'Surat Tidak Mampu') {
-                                    Navigator.pushNamed(
-                                        context, '/suratketerangantidakmampu');
-                                  } else if (layanan.nama_layanan ==
-                                      'Surat Izin Usaha') {
-                                    Navigator.pushNamed(
-                                        context, '/suratizinusaha');
-                                  } else {
-                                    print(
-                                        'No matching route for ${layanan.nama_layanan}'); // Debug statement
-                                  }
-                                },
                                 borderRadius: BorderRadius.circular(15.0),
                                 child: Container(
                                   decoration: BoxDecoration(
@@ -139,17 +127,15 @@ class _LayananPageState extends State<Layanan> {
                                     child: InkWell(
                                       borderRadius: BorderRadius.circular(15.0),
                                       onTap: () {
-                                        if (layanan.nama_layanan ==
-                                            'Surat Tidak Mampu') {
+                                        if (layanan.id == 1) {
                                           Navigator.pushNamed(context,
                                               '/suratketerangantidakmampu');
-                                        } else if (layanan.nama_layanan ==
-                                            'Surat Izin Usaha') {
+                                        } else if (layanan.id == 2) {
                                           Navigator.pushNamed(
                                               context, '/suratizinusaha');
                                         } else {
                                           print(
-                                              'No matching route for ${layanan.nama_layanan}'); // Debug statement
+                                              'No matching route for ${layanan.id}');
                                         }
                                       },
                                       child: Padding(
@@ -207,7 +193,7 @@ class _LayananPageState extends State<Layanan> {
               }
             },
           ),
-        ],
+        ),
       ),
     );
   }
