@@ -27,26 +27,27 @@ class DBHelper {
         version: 1,
         onCreate: (db, version) async {
           await db.execute('''
-          CREATE TABLE user (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nama_lengkap TEXT,
-            username TEXT,
-            email TEXT,
-            no_hp TEXT,
-            alamat TEXT,
-            jenis_kelamin TEXT,
-            tanggal_lahir TEXT,
-            kebangsaan TEXT,
-            pekerjaan TEXT,
-            status_nikah TEXT,
-            nik TEXT,
-            token TEXT
-          )
-        ''');
+        CREATE TABLE user (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          nama_lengkap TEXT,
+          username TEXT,
+          email TEXT,
+          no_hp TEXT,
+          alamat TEXT,
+          jenis_kelamin TEXT,
+          tanggal_lahir TEXT,
+          kebangsaan TEXT,
+          pekerjaan TEXT,
+          status_nikah TEXT,
+          nik TEXT,
+          token TEXT,
+          foto_profil TEXT
+        )
+      ''');
         },
       );
     } catch (e) {
-      print("Error inisialisasi database: $e");
+      print("Error initializing database: $e");
       rethrow;
     }
   }
@@ -73,7 +74,12 @@ class DBHelper {
       );
 
       if (maps.isNotEmpty) {
-        return User.fromJson(maps.first);
+        // Ambil nilai foto_profil dari baris data yang ditemukan
+        final fotoProfil = maps.first['foto_profil'];
+        // Kemudian buat objek User dengan nilai foto_profil yang diambil
+        final user = User.fromJson(maps.first);
+        user.foto_profil = fotoProfil; // Set nilai foto_profil
+        return user;
       } else {
         return null;
       }
@@ -94,6 +100,26 @@ class DBHelper {
       );
     } catch (error) {
       print("Error updating user: $error");
+      rethrow;
+    }
+  }
+
+  static Future<void> updateUserPhoto(String photoPath, String token) async {
+    try {
+      final db = await database;
+      int count = await db.update(
+        'user',
+        {'foto_profil': photoPath},
+        where: 'token = ?',
+        whereArgs: [token],
+      );
+      if (count > 0) {
+        print("Foto profil diperbarui di database");
+      } else {
+        print("Gagal memperbarui foto profil di database");
+      }
+    } catch (error) {
+      print("Error updating user photo: $error");
       rethrow;
     }
   }

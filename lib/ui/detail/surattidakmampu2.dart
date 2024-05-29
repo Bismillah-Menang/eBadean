@@ -1,6 +1,5 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:e_badean/database/db_helper.dart';
-import 'package:e_badean/ui/detail/surattidakmampu2.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -9,15 +8,15 @@ import 'package:e_badean/ip.dart';
 import 'package:e_badean/models/user.dart';
 import 'package:e_badean/models/formulir.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:file_picker/file_picker.dart'; 
 
-class SuratKeteranganTidakMampu extends StatefulWidget {
+class SuratKeteranganTidakMampu2 extends StatefulWidget {
   @override
-  _SuratKeteranganTidakMampuState createState() =>
-      _SuratKeteranganTidakMampuState();
+  _SuratKeteranganTidakMampuState2 createState() =>
+      _SuratKeteranganTidakMampuState2();
 }
 
-class _SuratKeteranganTidakMampuState extends State<SuratKeteranganTidakMampu> {
+class _SuratKeteranganTidakMampuState2 extends State<SuratKeteranganTidakMampu2> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController namaController = TextEditingController();
   final TextEditingController tempatLahirController = TextEditingController();
@@ -27,7 +26,7 @@ class _SuratKeteranganTidakMampuState extends State<SuratKeteranganTidakMampu> {
   final TextEditingController namaOrangTuaController = TextEditingController();
   final TextEditingController pekerjaanController = TextEditingController();
   final TextEditingController alamatortuController = TextEditingController();
-  final TextEditingController noKkController = TextEditingController();
+   final TextEditingController noKkController = TextEditingController();
 
   String _jenisKelamin = '';
   String _jenisKelaminOrangTua = '';
@@ -145,7 +144,7 @@ class _SuratKeteranganTidakMampuState extends State<SuratKeteranganTidakMampu> {
       print('Error mengirim data pengajuan: $error');
     }
   }
-
+  
   Future<void> _pickFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
 
@@ -156,12 +155,13 @@ class _SuratKeteranganTidakMampuState extends State<SuratKeteranganTidakMampu> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Surat Tidak Mampu',
+          'KIRIM UNTUK PENGGUNA LAIN',
           style: TextStyle(
             fontSize: 18.0,
             fontFamily: 'Poppins',
@@ -515,33 +515,6 @@ class _SuratKeteranganTidakMampuState extends State<SuratKeteranganTidakMampu> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  SuratKeteranganTidakMampu2()),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        primary: Color(0xFF1548AD),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                      ),
-                      child: Text(
-                        'TAMBAHKAN DATA PENGGUNA',
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 14.0,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-
                     SizedBox(height: 5),
                     ElevatedButton(
                       onPressed: () {
