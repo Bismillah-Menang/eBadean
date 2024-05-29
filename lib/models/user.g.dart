@@ -19,6 +19,7 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
       pekerjaan: json['pekerjaan'] as String?,
       status_nikah: json['status_nikah'] as String?,
       nik: json['nik'] as String?,
+      foto_profil: json['foto_profil'] as String?, // Tambahkan properti foto profil
     );
 
 Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
@@ -34,4 +35,5 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'pekerjaan': instance.pekerjaan,
       'status_nikah': instance.status_nikah,
       'nik': instance.nik,
+      'foto_profil': instance.foto_profil, // Ubah ke nama properti yang sesuai dalam database
     };

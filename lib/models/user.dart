@@ -17,6 +17,7 @@ class User {
   late String? pekerjaan;
   late String? status_nikah;
   late String? nik;
+  late String? foto_profil; 
 
   User({
     required this.id,
@@ -31,6 +32,7 @@ class User {
     required this.pekerjaan,
     required this.status_nikah,
     required this.nik,
+    this.foto_profil, 
   });
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
@@ -50,6 +52,7 @@ class User {
       'pekerjaan': pekerjaan,
       'status_nikah': status_nikah,
       'nik': nik,
+      'foto_profil': foto_profil, 
     };
   }
 }
