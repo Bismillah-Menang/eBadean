@@ -1,6 +1,4 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:e_badean/ui/login/login.dart';
@@ -9,8 +7,6 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server/gmail.dart';
-import 'package:awesome_dialog/awesome_dialog.dart';
-import 'dart:async';
 
 class Register extends StatefulWidget {
   @override
@@ -38,7 +34,7 @@ class _RegisterState extends State<Register> {
     String email = emailController.text;
     String password = passwordController.text;
     String role = 'penduduk';
-    String verificationCode = _generateOTP(); // Generate OTP
+    String verificationCode = _generateOTP();
 
     if (email.isEmpty ||
         password.isEmpty ||
@@ -78,10 +74,9 @@ class _RegisterState extends State<Register> {
   }
 
   String _generateOTP() {
-    // Generate OTP logic here
     Random random = Random();
     return (1000 + random.nextInt(9000))
-        .toString(); // Generate random 4-digit OTP
+        .toString(); 
   }
 
   void _showAlertDialog(String title, String message) {
@@ -114,7 +109,7 @@ class _RegisterState extends State<Register> {
           password: password,
           role: role,
           verificationCode:
-              verificationCode, // Pass the verificationCode parameter
+              verificationCode, 
         ),
       ),
     );
@@ -222,7 +217,7 @@ class _RegisterState extends State<Register> {
                 ElevatedButton(
                   onPressed: _registerUser,
                   style: ElevatedButton.styleFrom(
-                    primary: Colors.blue, // or any color you prefer
+                    backgroundColor: Colors.blue, 
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8.0),
                     ),

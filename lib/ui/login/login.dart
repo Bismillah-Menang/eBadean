@@ -26,7 +26,6 @@ class LoginPageState extends State<Login> {
   }
 
   Future<void> _login() async {
-    // Panggil validate untuk menjalankan validator
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -68,7 +67,7 @@ class LoginPageState extends State<Login> {
         if (loggedInUser != null) {
           await DBHelper.saveUser(loggedInUser, responseData['token']);
           print(
-              "Data pengguna tersimpan di SQLite: Email: ${loggedInUser.email}, Username: ${loggedInUser.username}");
+              "Data pengguna tersimpan di SQLite: Email: ${loggedInUser.email}");
           // Tampilkan dialog sukses
           _showSuccessDialog(
               "Anda berhasil login.", loggedInUser, responseData['token']);
@@ -84,7 +83,7 @@ class LoginPageState extends State<Login> {
     }
   }
 
-  // digunakan untuk mengambil email di dalam sharedpreference
+
   void _getEmailSharedPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? savedEmail = prefs.getString('registered_email');
@@ -126,9 +125,18 @@ class LoginPageState extends State<Login> {
       print("Response getUserFromToken: ${response.body}");
 
       if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
-        // Pastikan responseData berupa objek JSON yang sesuai dengan struktur User
-        return User.fromJson(responseData);
+      final responseData = json.decode(response.body);
+      // Pastikan responseData berupa objek JSON yang sesuai dengan struktur User
+      final userData = responseData['user'];
+      final pendudukData = responseData['penduduk'];
+
+      userData.remove('penduduk');
+
+      // Gabungkan data dari user dan penduduk
+      userData.addAll(pendudukData);
+      
+      // Buat objek User dari data yang digabung
+      return User.fromJson(userData);
       } else {
         print("Failed to get user data: ${response.statusCode}");
         return null;

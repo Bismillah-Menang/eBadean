@@ -6,8 +6,8 @@ import 'package:e_badean/ip.dart';
 class EmailVerification extends StatefulWidget {
   final String email;
   final String verificationCode;
-  final String password; // Added password parameter
-  final String role; // Added role parameter
+  final String password; 
+  final String role; 
 
   EmailVerification({
     required this.email,
@@ -23,10 +23,6 @@ class EmailVerification extends StatefulWidget {
 class EmailVerificationState extends State<EmailVerification> {
   TextEditingController otpController = TextEditingController();
   String generatedOTP = '';
-
-  void sendVerificationEmail() async {
-    // Your email sending logic here
-  }
 
   // Function to save user data to the database
   void saveUserToDatabase() async {

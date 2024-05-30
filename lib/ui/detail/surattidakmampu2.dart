@@ -61,27 +61,27 @@ class _SuratKeteranganTidakMampuState2 extends State<SuratKeteranganTidakMampu2>
     User? user = await _getUserFromLocal();
     if (user != null) {
       setState(() {
-        namaController.text = user.nama_lengkap;
-        alamatController.text = user.alamat ?? '';
+        // namaController.text = user.nama_lengkap;
+        // alamatController.text = user.alamat ?? '';
 
-        if (user.tanggal_lahir != null) {
-          final dateParts = user.tanggal_lahir!.split('-');
-          if (dateParts.length == 3) {
-            _pickedDate = DateTime(
-              int.parse(dateParts[2]),
-              int.parse(dateParts[1]),
-              int.parse(dateParts[0]),
-            );
-            tanggalLahirController.text =
-                DateFormat('dd-MM-yyyy').format(_pickedDate!);
-          }
-        }
+        // if (user.tanggal_lahir != null) {
+        //   final dateParts = user.tanggal_lahir!.split('-');
+        //   if (dateParts.length == 3) {
+        //     _pickedDate = DateTime(
+        //       int.parse(dateParts[2]),
+        //       int.parse(dateParts[1]),
+        //       int.parse(dateParts[0]),
+        //     );
+        //     tanggalLahirController.text =
+        //         DateFormat('dd-MM-yyyy').format(_pickedDate!);
+        //   }
+        // }
 
-        if (user.jenis_kelamin != null) {
-          _jenisKelamin = user.jenis_kelamin!;
-        } else {
-          _jenisKelamin = '';
-        }
+        // if (user.jenis_kelamin != null) {
+        //   _jenisKelamin = user.jenis_kelamin!;
+        // } else {
+        //   _jenisKelamin = '';
+        // }
       });
     }
   }

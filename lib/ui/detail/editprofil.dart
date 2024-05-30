@@ -79,25 +79,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
               ),
               SizedBox(height: 20),
               TextField(
-                controller: userNameController,
-                decoration: InputDecoration(
-                  labelText: 'Username',
-                  prefixIcon: Icon(Icons.person),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide: BorderSide(color: Colors.grey),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide: BorderSide(
-                      color: Color(0xFF1548AD),
-                    ),
-                  ),
-                  contentPadding: EdgeInsets.symmetric(vertical: 10.0),
-                ),
-              ),
-              SizedBox(height: 20),
-              TextField(
                 controller: emailController,
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
@@ -366,50 +347,67 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
-  Future<void> _populateUserData() async {
-    User? user = await _getUserFromLocal();
-    if (user != null) {
-      setState(() {
-        fullNameController.text = user.nama_lengkap;
-        userNameController.text = user.username;
-        emailController.text = user.email;
-        phoneNumberController.text = user.no_hp ?? '';
-        alamatController.text = user.alamat ?? '';
-        kebangsaanController.text = user.kebangsaan ?? '';
-        pekerjaanController.text = user.pekerjaan ?? '';
-        statusnikahController.text = user.status_nikah ?? '';
-        nikController.text = user.nik ?? '';
+  Future<void> _populateUserDataFromResponse(dynamic response) async {
+    if (response['status']) {
+      Map<String, dynamic> userData = response['user'];
 
-        if (user.tanggal_lahir != null) {
-          final dateParts = user.tanggal_lahir!.split('-');
+      setState(() {
+        fullNameController.text = userData['penduduk']['nama_lengkap'] ?? '';
+        emailController.text = userData['email'] ?? '';
+        phoneNumberController.text = userData['penduduk']['no_hp'] ?? '';
+        alamatController.text = userData['penduduk']['alamat'] ?? '';
+        kebangsaanController.text = userData['penduduk']['kebangsaan'] ?? '';
+        pekerjaanController.text = userData['penduduk']['pekerjaan'] ?? '';
+        statusnikahController.text = userData['penduduk']['status_nikah'] ?? '';
+        nikController.text = userData['penduduk']['nik'] ?? '';
+
+        if (userData['penduduk']['tanggal_lahir'] != null) {
+          final dateParts = userData['penduduk']['tanggal_lahir'].split('-');
           if (dateParts.length == 3) {
             _pickedDate = DateTime(
               int.parse(dateParts[2]),
               int.parse(dateParts[1]),
               int.parse(dateParts[0]),
             );
-            tgllahirController.text = DateFormat('dd-MM-yyyy').format(_pickedDate!);
+            tgllahirController.text =
+                DateFormat('dd-MM-yyyy').format(_pickedDate!);
           }
         }
 
-        if (user.jenis_kelamin != null) {
-          _selectedGender = user.jenis_kelamin;
-        } else {
-          _selectedGender = null;
-        }
+        _selectedGender = userData['penduduk']['jenis_kelamin'];
       });
     }
   }
 
-  Future<User?> _getUserFromLocal() async {
+  Future<void> _populateUserData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('token');
     if (token != null) {
-      return DBHelper.getUserFromLocal(token);
-    } else {
-      return null;
+      dynamic response = await DBHelper.getUserFromLocal(token);
+      await _populateUserDataFromResponse(response);
     }
   }
+
+Future<User?> _getUserFromLocal(String token) async {
+  try {
+    dynamic response = await DBHelper.getUserFromLocal(token);
+    if (response != null && response['status'] == true) {
+      dynamic userData = response['user'];
+      if (userData != null && userData['penduduk'] != null) {
+        return User.fromJson(userData);
+      } else {
+        print('Data pengguna tidak ditemukan dalam respons');
+        return null;
+      }
+    } else {
+      print('Respons tidak sesuai dengan yang diharapkan');
+      return null;
+    }
+  } catch (error) {
+    print("Error getting user data: $error");
+    return null;
+  }
+}
 
   Future<bool> _updateProfile() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -419,33 +417,40 @@ class _EditProfilePageState extends State<EditProfilePage> {
       String url = "${ApiConfig.baseUrl}/api/update_user";
 
       try {
-        final response = await http.put(
-          Uri.parse(url),
-          headers: <String, String>{
-            'Authorization': 'Bearer $token',
-            'Content-Type': 'application/json',
-          },
-          body: jsonEncode(<String, dynamic>{
-            'nama_lengkap': fullNameController.text,
-            'username': userNameController.text,
-            'email': emailController.text,
-            'no_hp': phoneNumberController.text,
-            'jenis_kelamin': _selectedGender,
-            'alamat': alamatController.text,
-            'tanggal_lahir': tgllahirController.text,
-            'kebangsaan': kebangsaanController.text,
-            'pekerjaan': pekerjaanController.text,
-            'status_nikah': statusnikahController.text,
-            'nik': nikController.text
-          }),
-        );
+        // Mendapatkan user dari database lokal
+        User? user = await DBHelper.getUserFromLocal(token);
+        if (user != null) {
+          final response = await http.put(
+            Uri.parse(url),
+            headers: <String, String>{
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode(<String, dynamic>{
+              'id_user': user.id,
+              'nama_lengkap': fullNameController.text,
+              'email': emailController.text,
+              'no_hp': phoneNumberController.text,
+              'jenis_kelamin': _selectedGender,
+              'alamat': alamatController.text,
+              'tanggal_lahir': tgllahirController.text,
+              'kebangsaan': kebangsaanController.text,
+              'pekerjaan': pekerjaanController.text,
+              'status_nikah': statusnikahController.text,
+              'nik': nikController.text
+            }),
+          );
 
-        if (response.statusCode == 200) {
-          print("User data updated successfully");
-          await _updateUserToLocal(token);
-          return true;
+          if (response.statusCode == 200) {
+            print("User data updated successfully");
+            await _updateUserToLocal(token);
+            return true;
+          } else {
+            print("Failed to update user data: ${response.body}");
+            return false;
+          }
         } else {
-          print("Failed to update user data: ${response.body}");
+          print("User not found in local database");
           return false;
         }
       } catch (error) {
@@ -469,26 +474,41 @@ class _EditProfilePageState extends State<EditProfilePage> {
     )..show();
   }
 
-  Future<User?> _updateUserToLocal(String token) async {
-    User? existingUser = await _getUserFromLocal();
+Future<void> _updateUserToLocal(String token) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('token');
+
+  if (token != null) {
+    User? existingUser = await _getUserFromLocal(token);
     if (existingUser != null) {
+      Map<String, dynamic> updatedPenduduk = {
+        'nama_lengkap': fullNameController.text,
+        'no_hp': phoneNumberController.text,
+        'jenis_kelamin': _selectedGender,
+        'alamat': alamatController.text,
+        'tanggal_lahir': tgllahirController.text,
+        'kebangsaan': kebangsaanController.text,
+        'pekerjaan': pekerjaanController.text,
+        'status_nikah': statusnikahController.text,
+        'nik': nikController.text,
+      };
+
       User updatedUser = User(
         id: existingUser.id,
-        nama_lengkap: fullNameController.text,
-        username: userNameController.text,
         email: emailController.text,
-        no_hp: phoneNumberController.text,
-        alamat: alamatController.text,
-        jenis_kelamin: _selectedGender,
-        tanggal_lahir: tgllahirController.text,
-        kebangsaan: kebangsaanController.text,
-        pekerjaan: pekerjaanController.text,
-        status_nikah: statusnikahController.text,
-        nik: nikController.text,
+        penduduk: updatedPenduduk,
       );
 
+      // Simpan data pengguna yang diperbarui ke penyimpanan lokal
       await DBHelper.updateUser(updatedUser, token);
+
+      // Perbarui tampilan dengan data pengguna yang diperbarui
       await _populateUserData();
     }
+  } else {
+    print("Token not found");
   }
+}
+
+
 }

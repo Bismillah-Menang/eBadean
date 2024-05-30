@@ -36,20 +36,20 @@ class _ProfilPageState extends State<Profil> {
       setState(() {
         _user = user;
         // Jika ada path foto profil dari file lokal, gunakan File
-        if (_user!.foto_profil != null &&
-            _user!.foto_profil!.startsWith('profile_images')) {
-          _imageFile = File(_user!.foto_profil!);
-        }
-        // Jika ada path foto profil dari URL, gunakan CachedNetworkImage
-        else if (_user!.foto_profil != null &&
-            _user!.foto_profil!.startsWith('http')) {
-          _imageFile =
-              null; // Kosongkan _imageFile agar CachedNetworkImage dapat digunakan
-        }
-        // Jika tidak ada path foto profil
-        else {
-          _imageFile = null;
-        }
+        // if (_user!.foto_profil != null &&
+        //     _user!.foto_profil!.startsWith('profile_images')) {
+        //   _imageFile = File(_user!.foto_profil!);
+        // }
+        // // Jika ada path foto profil dari URL, gunakan CachedNetworkImage
+        // else if (_user!.foto_profil != null &&
+        //     _user!.foto_profil!.startsWith('http')) {
+        //   _imageFile =
+        //       null; // Kosongkan _imageFile agar CachedNetworkImage dapat digunakan
+        // }
+        // // Jika tidak ada path foto profil
+        // else {
+        //   _imageFile = null;
+        // }
       });
     }
   }
@@ -73,7 +73,7 @@ class _ProfilPageState extends State<Profil> {
 
         if (token != null) {
           await DBHelper.updateUserPhoto(
-              imagePath, token); // Memperbarui foto profil di database
+              imagePath, token); 
         }
 
         // Upload foto profil ke server
@@ -129,7 +129,6 @@ class _ProfilPageState extends State<Profil> {
         if (pickedFile != null) {
           _imageFile = File(pickedFile.path);
 
-          // Simpan foto profil ke penyimpanan lokal (SQLite)
           _saveImageToLocalStorage(_imageFile!.path);
         } else {
           print('No image selected.');
@@ -146,9 +145,9 @@ class _ProfilPageState extends State<Profil> {
   void _logout() async {
     try {
       // Simpan path foto profil sebelum logout
-      if (_user != null && _user!.foto_profil != null) {
-        await _saveImageToLocalStorage(_user!.foto_profil!);
-      }
+      // if (_user != null && _user!.foto_profil != null) {
+      //   await _saveImageToLocalStorage(_user!.foto_profil!);
+      // }
 
       // Hapus token dari SharedPreferences
       SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -184,40 +183,40 @@ class _ProfilPageState extends State<Profil> {
                 child: Column(
                   children: [
                     SizedBox(height: 40.0),
-                    CircleAvatar(
-                      radius: 75.0,
-                      child: ClipOval(
-                        child: _imageFile != null
-                            ? Image.file(_imageFile!,
-                                fit: BoxFit.cover, width: 150, height: 150)
-                            : _user?.foto_profil != null
-                                ? CachedNetworkImage(
-                                    imageUrl:
-                                        '${ApiConfig.baseUrl}/${_user!.foto_profil!}',
-                                    placeholder: (context, url) =>
-                                        CircularProgressIndicator(),
-                                    errorWidget: (context, url, error) =>
-                                        Icon(Icons.error),
-                                    fit: BoxFit.cover,
-                                    width: 150,
-                                    height: 150,
-                                  )
-                                : Container(
-                                    color: Colors
-                                        .grey, // Warna latar belakang yang digunakan saat tidak ada gambar profil
-                                    width: 150,
-                                    height: 150,
-                                    child: Center(
-                                      child: Icon(
-                                        Icons
-                                            .account_circle, // Icon default yang digunakan saat tidak ada gambar profil
-                                        size: 100,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                      ),
-                    ),
+                    // CircleAvatar(
+                    //   radius: 75.0,
+                    //   child: ClipOval(
+                    //     child: _imageFile != null
+                    //         ? Image.file(_imageFile!,
+                    //             fit: BoxFit.cover, width: 150, height: 150)
+                    //         : _user?.foto_profil != null
+                    //             ? CachedNetworkImage(
+                    //                 imageUrl:
+                    //                     '${ApiConfig.baseUrl}/${_user!.foto_profil!}',
+                    //                 placeholder: (context, url) =>
+                    //                     CircularProgressIndicator(),
+                    //                 errorWidget: (context, url, error) =>
+                    //                     Icon(Icons.error),
+                    //                 fit: BoxFit.cover,
+                    //                 width: 150,
+                    //                 height: 150,
+                    //               )
+                    //             : Container(
+                    //                 color: Colors
+                    //                     .grey, // Warna latar belakang yang digunakan saat tidak ada gambar profil
+                    //                 width: 150,
+                    //                 height: 150,
+                    //                 child: Center(
+                    //                   child: Icon(
+                    //                     Icons
+                    //                         .account_circle, // Icon default yang digunakan saat tidak ada gambar profil
+                    //                     size: 100,
+                    //                     color: Colors.white,
+                    //                   ),
+                    //                 ),
+                    //               ),
+                    //   ),
+                    // ),
                     SizedBox(height: 20.0),
                     ElevatedButton(
                       onPressed: _getImage,
@@ -264,10 +263,21 @@ class _ProfilPageState extends State<Profil> {
                     SizedBox(height: 30.0),
                     Column(
                       children: [
+                        // Align(
+                        //   alignment: Alignment.centerLeft,
+                        //   child: Text(
+                        //     'Fullname: ${_user?.nama_lengkap ?? ''}',
+                        //     style: TextStyle(
+                        //       fontSize: 16,
+                        //       fontFamily: 'Poppins',
+                        //     ),
+                        //   ),
+                        // ),
+                        Divider(), // Garis horizontal
                         Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
-                            'Fullname: ${_user?.nama_lengkap ?? ''}',
+                            'Email: ${_user?.email}',
                             style: TextStyle(
                               fontSize: 16,
                               fontFamily: 'Poppins',
@@ -275,38 +285,27 @@ class _ProfilPageState extends State<Profil> {
                           ),
                         ),
                         Divider(), // Garis horizontal
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            'Email: ${_user?.email ?? ''}',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontFamily: 'Poppins',
-                            ),
-                          ),
-                        ),
-                        Divider(), // Garis horizontal
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            'No Telepon: ${_user?.no_hp ?? ''}',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontFamily: 'Poppins',
-                            ),
-                          ),
-                        ),
+                        // Align(
+                        //   alignment: Alignment.centerLeft,
+                        //   child: Text(
+                        //     'No Telepon: ${_user?.no_hp ?? ''}',
+                        //     style: TextStyle(
+                        //       fontSize: 16,
+                        //       fontFamily: 'Poppins',
+                        //     ),
+                        //   ),
+                        // ),
                         Divider(),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            'Alamat: ${_user?.alamat ?? ''}',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontFamily: 'Poppins',
-                            ),
-                          ),
-                        ),
+                        // Align(
+                        //   alignment: Alignment.centerLeft,
+                        //   child: Text(
+                        //     'Alamat: ${_user?.alamat ?? ''}',
+                        //     style: TextStyle(
+                        //       fontSize: 16,
+                        //       fontFamily: 'Poppins',
+                        //     ),
+                        //   ),
+                        // ),
                         Divider(), // Garis horizontal
                         SizedBox(height: 30.0),
                         SizedBox(height: 30.0),

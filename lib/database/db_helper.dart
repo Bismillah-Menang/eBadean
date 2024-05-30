@@ -29,19 +29,8 @@ class DBHelper {
           await db.execute('''
         CREATE TABLE user (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
-          nama_lengkap TEXT,
-          username TEXT,
           email TEXT,
-          no_hp TEXT,
-          alamat TEXT,
-          jenis_kelamin TEXT,
-          tanggal_lahir TEXT,
-          kebangsaan TEXT,
-          pekerjaan TEXT,
-          status_nikah TEXT,
-          nik TEXT,
-          token TEXT,
-          foto_profil TEXT
+          token TEXT
         )
       ''');
         },
@@ -51,6 +40,17 @@ class DBHelper {
       rethrow;
     }
   }
+
+          // no_hp TEXT,
+          // alamat TEXT,
+          // jenis_kelamin TEXT,
+          // tanggal_lahir TEXT,
+          // kebangsaan TEXT,
+          // pekerjaan TEXT,
+          // status_nikah TEXT,
+          // nik TEXT,
+          // token TEXT,
+          // foto_profil TEXT
 
   static Future<void> saveUser(User user, String token) async {
     final db = await database;
@@ -75,10 +75,10 @@ class DBHelper {
 
       if (maps.isNotEmpty) {
         // Ambil nilai foto_profil dari baris data yang ditemukan
-        final fotoProfil = maps.first['foto_profil'];
-        // Kemudian buat objek User dengan nilai foto_profil yang diambil
+        // final fotoProfil = maps.first['foto_profil'];
+        // // Kemudian buat objek User dengan nilai foto_profil yang diambil
         final user = User.fromJson(maps.first);
-        user.foto_profil = fotoProfil; // Set nilai foto_profil
+        // user.foto_profil = fotoProfil; // Set nilai foto_profil
         return user;
       } else {
         return null;
