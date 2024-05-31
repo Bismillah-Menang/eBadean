@@ -1,6 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' as path;
 import 'package:e_badean/models/user.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DBHelper {
   static final DBHelper _instance = DBHelper._internal();
@@ -27,12 +28,24 @@ class DBHelper {
         version: 1,
         onCreate: (db, version) async {
           await db.execute('''
-        CREATE TABLE user (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          email TEXT,
-          token TEXT
-        )
-      ''');
+          CREATE TABLE user (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT,
+            token TEXT,
+            role TEXT,  -- Tambahkan kolom role di sini
+            nama_lengkap TEXT,
+            username TEXT,
+            no_hp TEXT,
+            alamat TEXT,
+            jenis_kelamin TEXT,
+            tanggal_lahir TEXT,
+            kebangsaan TEXT,
+            pekerjaan TEXT,
+            status_nikah TEXT,
+            nik TEXT,
+            foto_profil TEXT
+          )
+        ''');
         },
       );
     } catch (e) {
@@ -41,28 +54,21 @@ class DBHelper {
     }
   }
 
-          // no_hp TEXT,
-          // alamat TEXT,
-          // jenis_kelamin TEXT,
-          // tanggal_lahir TEXT,
-          // kebangsaan TEXT,
-          // pekerjaan TEXT,
-          // status_nikah TEXT,
-          // nik TEXT,
-          // token TEXT,
-          // foto_profil TEXT
-
   static Future<void> saveUser(User user, String token) async {
     final db = await database;
     await db.insert(
       'user',
       {
-        ...user.toJson(),
+        'id': user.id, // Pastikan id disimpan sebagai int
+        'email': user.email,
+        'role': user.role,
         'token': token,
+        // tambahkan kolom lainnya sesuai kebutuhan
       },
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
+  
 
   static Future<User?> getUserFromLocal(String token) async {
     try {
@@ -74,12 +80,14 @@ class DBHelper {
       );
 
       if (maps.isNotEmpty) {
-        // Ambil nilai foto_profil dari baris data yang ditemukan
-        // final fotoProfil = maps.first['foto_profil'];
-        // // Kemudian buat objek User dengan nilai foto_profil yang diambil
-        final user = User.fromJson(maps.first);
-        // user.foto_profil = fotoProfil; // Set nilai foto_profil
-        return user;
+        // Pastikan 'id' diambil sebagai int
+        int userId = maps.first['id'] as int;
+        return User.fromJson({
+          'id': userId,
+          'email': maps.first['email'],
+          'role': maps.first['role'],
+          'penduduk': maps.first,
+        });
       } else {
         return null;
       }
@@ -95,8 +103,8 @@ class DBHelper {
       await db.update(
         'user',
         updatedUser.toJson(),
-        where: 'id = ?',
-        whereArgs: [updatedUser.id],
+        where: 'token = ?',
+        whereArgs: [token],
       );
     } catch (error) {
       print("Error updating user: $error");
@@ -120,6 +128,41 @@ class DBHelper {
       }
     } catch (error) {
       print("Error updating user photo: $error");
+      rethrow;
+    }
+  }
+
+  static Future<bool> isNotificationShown(String notificationId) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      return prefs.getBool(notificationId) ?? false;
+    } catch (e) {
+      print('Error checking if notification is shown: $e');
+      return false;
+    }
+  }
+
+  static Future<void> saveToken(String token) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('token', token);
+    } catch (error) {
+      print("Error saving token: $error");
+      rethrow;
+    }
+  }
+
+  static Future<void> savePendudukData(
+      Map<String, dynamic> pendudukData, String token) async {
+    try {
+      final db = await database;
+      await db.insert(
+        'penduduk',
+        pendudukData,
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    } catch (error) {
+      print("Error saving penduduk data: $error");
       rethrow;
     }
   }
