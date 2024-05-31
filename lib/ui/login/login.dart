@@ -50,47 +50,89 @@ class LoginPageState extends State<Login> {
 
       print("Response: ${response.body}");
 
-      final responseData = json.decode(response.body);
+      if (response.body != null) {
+        final responseData = json.decode(response.body);
 
-      setState(() {
-        _isLoading = false;
-      });
+        setState(() {
+          _isLoading = false;
+        });
 
-      if (response.statusCode == 200 &&
-          responseData['status'] == true &&
-          responseData['token'] != null) {
-        print("Token berhasil didapatkan: ${responseData['token']}");
-        await _saveToken(responseData['token']);
+        if (response.statusCode == 200 &&
+            responseData['status'] == true &&
+            responseData['token'] != null) {
+          print("Token berhasil didapatkan: ${responseData['token']}");
+          String token = responseData['token']; // Ambil token dari respons
 
-        User? loggedInUser = await getUserFromToken(responseData['token']);
+          // Simpan token ke SharedPreferences
+          await DBHelper.saveToken(token);
 
-        if (loggedInUser != null) {
-          await DBHelper.saveUser(loggedInUser, responseData['token']);
-          print(
-              "Data pengguna tersimpan di SQLite: Email: ${loggedInUser.email}");
-          // Tampilkan dialog sukses
-          _showSuccessDialog(
-              "Anda berhasil login.", loggedInUser, responseData['token']);
+          // Memperbaiki penanganan respons jika data penduduk ada
+          if (responseData['penduduk'] != null) {
+            final pendudukData = responseData['penduduk'];
+            await DBHelper.savePendudukData(pendudukData, token);
+          }
+
+          User? loggedInUser = await getUserFromToken(responseData['token']);
+
+          if (loggedInUser != null) {
+            await DBHelper.saveUser(loggedInUser, responseData['token']);
+            print(
+                "Data pengguna tersimpan di SQLite: Email: ${loggedInUser.email}");
+
+            // Simpan token dan data pengguna ke SharedPreferences
+            await _saveToken(token);
+            await _saveUserData(loggedInUser);
+            _showSuccessDialog(
+                "Anda berhasil login.", loggedInUser, responseData['token']);
+          } else {
+            _showErrorDialog("Gagal mendapatkan data pengguna atau penduduk.");
+          }
         } else {
-          _showErrorDialog("Gagal mendapatkan data pengguna.");
+          _handleLoginError(responseData, response.statusCode);
         }
       } else {
-        _handleLoginError(responseData, response.statusCode);
+        setState(() {
+          _isLoading = false;
+        });
+        _showErrorDialog("Response body is null.");
       }
     } catch (error) {
       print("Error: $error");
+      setState(() {
+        _isLoading = false;
+      });
       _showErrorDialog("Terjadi kesalahan. Silakan coba lagi.");
     }
   }
 
-
-  void _getEmailSharedPreferences() async {
+  Future<void> _saveUserData(User user) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? savedEmail = prefs.getString('registered_email');
-    if (savedEmail != null) {
-      print('Email dari SharedPreferences: $savedEmail');
+    prefs.setString(
+        'userData',
+        jsonEncode({
+          'id_user': user.id,
+          'email': user.email,
+          'role': user.role,
+          'penduduk': user.penduduk != null ? user.penduduk!.toJson() : null,
+        }));
+  }
+
+  Future<void> _getEmailSharedPreferences() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? savedUserData = prefs.getString('userData');
+    if (savedUserData != null) {
+      Map<String, dynamic> userData = jsonDecode(savedUserData);
+      print('User data from SharedPreferences: $userData');
       setState(() {
-        emailController.text = savedEmail;
+        emailController.text = userData['email'];
+        // Tambahkan penanganan untuk menampilkan data penduduk
+        if (userData['penduduk'] != null) {
+          Map<String, dynamic> pendudukData = userData['penduduk'];
+          // Tampilkan data penduduk sesuai kebutuhan
+          print('Penduduk data from SharedPreferences: $pendudukData');
+          // Disimpan ke SharedPreferences juga jika diperlukan
+          prefs.setString('pendudukData', jsonEncode(pendudukData));
+        }
       });
     }
   }
@@ -111,7 +153,7 @@ class LoginPageState extends State<Login> {
     await prefs.setString('token', token);
   }
 
-  Future<User?> getUserFromToken(String token) async {
+  static Future<User?> getUserFromToken(String token) async {
     try {
       String url = "${ApiConfig.baseUrl}/api/get_user";
 
@@ -125,18 +167,18 @@ class LoginPageState extends State<Login> {
       print("Response getUserFromToken: ${response.body}");
 
       if (response.statusCode == 200) {
-      final responseData = json.decode(response.body);
-      // Pastikan responseData berupa objek JSON yang sesuai dengan struktur User
-      final userData = responseData['user'];
-      final pendudukData = responseData['penduduk'];
-
-      userData.remove('penduduk');
-
-      // Gabungkan data dari user dan penduduk
-      userData.addAll(pendudukData);
-      
-      // Buat objek User dari data yang digabung
-      return User.fromJson(userData);
+        final responseData = json.decode(response.body);
+        if (responseData['status'] == true) {
+          final userData = responseData['user'];
+          if (userData != null) {
+            // Mengonversi JSON user menjadi objek User
+            User user = User.fromJson(userData);
+            return user;
+          }
+        } else {
+          print("Failed to get user data: ${responseData['message']}");
+          return null;
+        }
       } else {
         print("Failed to get user data: ${response.statusCode}");
         return null;
