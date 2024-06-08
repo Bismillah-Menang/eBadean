@@ -22,7 +22,6 @@ class LoginPageState extends State<Login> {
   @override
   void initState() {
     super.initState();
-    _getEmailSharedPreferences();
   }
 
   Future<void> _login() async {
@@ -61,12 +60,10 @@ class LoginPageState extends State<Login> {
             responseData['status'] == true &&
             responseData['token'] != null) {
           print("Token berhasil didapatkan: ${responseData['token']}");
-          String token = responseData['token']; // Ambil token dari respons
+          String token = responseData['token']; 
 
-          // Simpan token ke SharedPreferences
           await DBHelper.saveToken(token);
 
-          // Memperbaiki penanganan respons jika data penduduk ada
           if (responseData['penduduk'] != null) {
             final pendudukData = responseData['penduduk'];
             await DBHelper.savePendudukData(pendudukData, token);
@@ -75,18 +72,14 @@ class LoginPageState extends State<Login> {
           User? loggedInUser = await getUserFromToken(responseData['token']);
 
           if (loggedInUser != null) {
-            await DBHelper.saveUser(loggedInUser, responseData['token']);
-            print(
-                "Data pengguna tersimpan di SQLite: Email: ${loggedInUser.email}");
-
-            // Simpan token dan data pengguna ke SharedPreferences
+            await DBHelper.saveUser(loggedInUser, token);
             await _saveToken(token);
-            await _saveUserData(loggedInUser);
             _showSuccessDialog(
                 "Anda berhasil login.", loggedInUser, responseData['token']);
           } else {
             _showErrorDialog("Gagal mendapatkan data pengguna atau penduduk.");
           }
+          _printAllUsersFromSQLite();
         } else {
           _handleLoginError(responseData, response.statusCode);
         }
@@ -105,41 +98,11 @@ class LoginPageState extends State<Login> {
     }
   }
 
-  Future<void> _saveUserData(User user) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString(
-        'userData',
-        jsonEncode({
-          'id_user': user.id,
-          'email': user.email,
-          'role': user.role,
-          'penduduk': user.penduduk != null ? user.penduduk!.toJson() : null,
-        }));
-  }
-
-  Future<void> _getEmailSharedPreferences() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? savedUserData = prefs.getString('userData');
-    if (savedUserData != null) {
-      Map<String, dynamic> userData = jsonDecode(savedUserData);
-      print('User data from SharedPreferences: $userData');
-      setState(() {
-        emailController.text = userData['email'];
-        // Tambahkan penanganan untuk menampilkan data penduduk
-        if (userData['penduduk'] != null) {
-          Map<String, dynamic> pendudukData = userData['penduduk'];
-          // Tampilkan data penduduk sesuai kebutuhan
-          print('Penduduk data from SharedPreferences: $pendudukData');
-          // Disimpan ke SharedPreferences juga jika diperlukan
-          prefs.setString('pendudukData', jsonEncode(pendudukData));
-        }
-      });
-    }
-  }
-
-  void setEmailControllerText(String email) {
-    setState(() {
-      emailController.text = email;
+   Future<void> _printAllUsersFromSQLite() async {
+    final allUsers = await DBHelper.getAllUsers();
+    print("All users from SQLite:");
+    allUsers.forEach((user) {
+      print(user);
     });
   }
 
@@ -171,7 +134,6 @@ class LoginPageState extends State<Login> {
         if (responseData['status'] == true) {
           final userData = responseData['user'];
           if (userData != null) {
-            // Mengonversi JSON user menjadi objek User
             User user = User.fromJson(userData);
             return user;
           }
@@ -388,7 +350,7 @@ class LoginPageState extends State<Login> {
                         ),
                         style: ElevatedButton.styleFrom(
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(10),
                           ),
                           padding: EdgeInsets.symmetric(vertical: 10),
                           backgroundColor: Color(0xFF1548AD),

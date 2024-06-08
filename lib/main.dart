@@ -8,19 +8,13 @@ import 'package:e_badean/ui/login/lupas.dart';
 import 'package:e_badean/ui/register/register.dart';
 import 'package:e_badean/ui/splash.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? token = prefs.getString('token');
-  runApp(MyApp(initialRoute: token != null ? '/bottomnav' : '/splash'));
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final String initialRoute;
-
-  const MyApp({required this.initialRoute, Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -31,9 +25,9 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       debugShowCheckedModeBanner: false,
-      initialRoute: initialRoute,
+      initialRoute: '/',
       routes: {
-        '/splash': (context) => Splash(),
+        '/': (context) => Splash(),
         '/daftar': (context) => Register(),
         '/lupas': (context) => Lupas(),
         '/login': (context) => Login(),

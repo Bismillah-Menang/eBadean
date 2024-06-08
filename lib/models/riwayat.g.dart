@@ -8,14 +8,14 @@ part of 'riwayat.dart';
 
 Riwayat _$RiwayatFromJson(Map<String, dynamic> json) => Riwayat(
       id: json['id'] as int,
-      namaLayanan: json['namaLayanan'] as String,
-      tanggal: json['tanggal'] as String,
+      namaLayanan: json['nama_layanan'] as String,
+      tanggal: json['tgl_pengajuan'] as String,
       status: json['status'] as String,
     );
 
 Map<String, dynamic> _$RiwayatToJson(Riwayat instance) => <String, dynamic>{
       'id': instance.id,
-      'namaLayanan': instance.namaLayanan,
-      'tanggal': instance.tanggal,
+      'nama_layanan': instance.namaLayanan,
+      'tgl_pengajuan': instance.tanggal,
       'status': instance.status,
     };

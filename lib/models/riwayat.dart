@@ -21,3 +21,4 @@ class Riwayat {
   Map<String, dynamic> toJson() => _$RiwayatToJson(this);
 }
 
+

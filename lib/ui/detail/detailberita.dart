@@ -1,18 +1,21 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart'; 
 
 class DetailBerita extends StatelessWidget {
   final String judul;
   final String tgl;
   final String isi;
-  final Uint8List
-      foto; 
+  final String sumber;
+  final Uint8List foto;
 
-  DetailBerita(
-      {required this.judul,
-      required this.tgl,
-      required this.isi,
-      required this.foto});
+  DetailBerita({
+    required this.judul,
+    required this.tgl,
+    required this.isi,
+    required this.sumber,
+    required this.foto,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +36,7 @@ class DetailBerita extends StatelessWidget {
               Text(
                 judul,
                 style: TextStyle(
+                  fontFamily: 'Poppins',
                   fontSize: 20.0,
                   fontWeight: FontWeight.bold,
                 ),
@@ -40,21 +44,42 @@ class DetailBerita extends StatelessWidget {
               Text(
                 tgl,
                 style: TextStyle(
+                  fontFamily: 'Poppins',
                   fontSize: 15.0,
                 ),
               ),
               SizedBox(height: 15.0),
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 10.0),
-                child: Image.memory(
-                    foto), // Menampilkan gambar dari foto_berita yang telah di-decode menjadi Uint8List
+                child: Image.memory(foto),
               ),
               SizedBox(height: 15.0),
-              Padding(
-                padding: EdgeInsets.symmetric(vertical: 10.0),
+              Text(
+                isi,
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 15.0,
+                ),
+              ),
+              Text(
+                'Baca Selengkapnya :',
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 15.0,
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  launch(sumber); 
+                },
                 child: Text(
-                  isi,
-                  style: TextStyle(fontSize: 16.0),
+                  sumber,
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 15.0,
+                    color: Color(0xFF1548AD),
+                    decoration: TextDecoration.underline,
+                  ),
                 ),
               ),
             ],

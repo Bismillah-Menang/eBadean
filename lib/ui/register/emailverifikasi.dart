@@ -136,7 +136,7 @@ class EmailVerificationState extends State<EmailVerification> {
                 ),
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   padding: EdgeInsets.symmetric(vertical: 10),
                   backgroundColor: Color(0xFF1548AD),

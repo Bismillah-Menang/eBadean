@@ -14,6 +14,7 @@ class Berita extends StatefulWidget {
 
 class _BeritaState extends State<Berita> {
   late Future<BeritaList> _beritaListFuture;
+  TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -53,15 +54,12 @@ class _BeritaState extends State<Berita> {
                 return Center(child: Text('Error: ${snapshot.error}'));
               } else {
                 final beritaList = snapshot.data!;
+                final filteredBeritaList = beritaList.filterByJudul(_searchController.text);
+
                 return SingleChildScrollView(
                   physics: AlwaysScrollableScrollPhysics(),
                   child: Padding(
-                    padding: EdgeInsets.only(
-                      top: 20.0,
-                      bottom: 85.0,
-                      left: 20.0,
-                      right: 20.0,
-                    ),
+                    padding: EdgeInsets.all(20.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -84,6 +82,10 @@ class _BeritaState extends State<Berita> {
                             borderRadius: BorderRadius.circular(20.0),
                           ),
                           child: TextField(
+                            controller: _searchController,
+                            onChanged: (value) {
+                              setState(() {});
+                            },
                             decoration: InputDecoration(
                               hintText: 'Cari Berita',
                               hintStyle: TextStyle(
@@ -104,9 +106,9 @@ class _BeritaState extends State<Berita> {
                         ListView.builder(
                           shrinkWrap: true,
                           physics: NeverScrollableScrollPhysics(),
-                          itemCount: beritaList.data?.length,
+                          itemCount: filteredBeritaList.length,
                           itemBuilder: (context, index) {
-                            final berita = beritaList.data![index];
+                            final berita = filteredBeritaList[index];
                             return Padding(
                               padding: EdgeInsets.only(bottom: 20.0),
                               child: InkWell(
@@ -118,6 +120,7 @@ class _BeritaState extends State<Berita> {
                                         judul: berita.judul_berita,
                                         tgl: berita.tgl_berita,
                                         isi: berita.isi_berita,
+                                        sumber: berita.sumber,
                                         foto: berita.foto_berita,
                                       ),
                                     ),

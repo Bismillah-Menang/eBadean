@@ -22,33 +22,38 @@ class _RiwayatPageState extends State<RiwayatPage> {
   }
 
   Future<List<Riwayat>> fetchRiwayat() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String? token = prefs.getString('token');
-    if (token != null) {
-      final User? user = await DBHelper.getUserFromLocal(token);
-      final int? idPenduduk = user?.id;
-      if (idPenduduk != null) {
-        final Uri uri =
-            Uri.parse('${ApiConfig.baseUrl}/api/riwayat/$idPenduduk');
-        final response = await http.get(uri);
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final String? token = prefs.getString('token');
 
-        if (response.statusCode == 200) {
-          final Map<String, dynamic>? responseData = json.decode(response.body);
-          if (responseData != null && responseData.containsKey('data')) {
-            final List<dynamic> jsonData =
-                responseData['data'] as List<dynamic>;
-            return jsonData.map((data) => Riwayat.fromJson(data)).toList();
-          } else {
-            throw Exception('Invalid API response: data not found');
-          }
+      if (token == null) {
+        return [];
+      }
+
+      final User? user = await DBHelper.getUserFromLocal(token);
+      final int? idPenduduk = user?.penduduk?.id;
+
+      final Uri uri = Uri.parse('${ApiConfig.baseUrl}/api/riwayat/$idPenduduk');
+      print('Fetching data from: $uri');
+      final response = await http.get(uri);
+
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic>? responseData = json.decode(response.body);
+        print('Response data: $responseData');
+        if (responseData != null && responseData.containsKey('data')) {
+          final List<dynamic> jsonData = responseData['data'] as List<dynamic>;
+          return jsonData.map((data) => Riwayat.fromJson(data)).toList();
         } else {
-          throw Exception('Failed to load riwayat');
+          return [];
         }
       } else {
-        throw Exception('ID Penduduk is null');
+        return [];
       }
-    } else {
-      throw Exception('Token is null');
+    } catch (error) {
+      print('Error fetching riwayat: $error');
+      return [];
     }
   }
 
@@ -65,8 +70,8 @@ class _RiwayatPageState extends State<RiwayatPage> {
           child: SingleChildScrollView(
             physics: AlwaysScrollableScrollPhysics(),
             child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
+              padding: const EdgeInsets.only(
+                  top: 20.0, bottom: 85.0, left: 20.0, right: 20.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

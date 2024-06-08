@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:e_badean/database/db_helper.dart';
 import 'package:e_badean/ip.dart'; // Ensure this import exists
 import 'package:e_badean/models/user.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -22,6 +25,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneNumberController = TextEditingController();
   final TextEditingController alamatController = TextEditingController();
+  final TextEditingController tempatLahirController = TextEditingController();
   final TextEditingController tgllahirController = TextEditingController();
   final TextEditingController kebangsaanController = TextEditingController();
   final TextEditingController pekerjaanController = TextEditingController();
@@ -30,11 +34,35 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   String? _selectedGender;
   DateTime? _pickedDate;
+  String? _filePath;
+  String? _filePathKtp;
+  String? _fotoKKUrl;
+  String? _fotoKTPUrl;
 
   @override
   void initState() {
     super.initState();
     _populateUserData();
+  }
+
+  Future<void> _pickFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+    if (result != null) {
+      setState(() {
+        _filePath = result.files.single.path;
+      });
+    }
+  }
+
+  Future<void> _pickKtp() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+    if (result != null) {
+      setState(() {
+        _filePathKtp = result.files.single.path;
+      });
+    }
   }
 
   @override
@@ -158,6 +186,25 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 decoration: InputDecoration(
                   labelText: 'Alamat',
                   prefixIcon: Icon(Icons.home),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide(color: Colors.grey),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide(
+                      color: Color(0xFF1548AD),
+                    ),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(vertical: 10.0),
+                ),
+              ),
+              SizedBox(height: 20),
+              TextField(
+                controller: tempatLahirController,
+                decoration: InputDecoration(
+                  labelText: 'Tempat Lahir',
+                  prefixIcon: Icon(Icons.location_city),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),
                     borderSide: BorderSide(color: Colors.grey),
@@ -296,7 +343,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 controller: nikController,
                 decoration: InputDecoration(
                   labelText: 'Masukkan NIK',
-                  prefixIcon: Icon(Icons.credit_card),
+                  prefixIcon: Icon(Icons.badge),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),
                     borderSide: BorderSide(color: Colors.grey),
@@ -317,12 +364,76 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 },
               ),
               SizedBox(height: 20),
+              GestureDetector(
+                onTap: _pickFile,
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Column(
+                    children: [
+                      ListTile(
+                        leading: Icon(Icons.upload_file),
+                        title: Text(
+                          _filePath == null
+                              ? 'Unggah Foto/Scan KK'
+                              : 'File terpilih: ${_filePath!.split('/').last}',
+                          style: TextStyle(fontSize: 14.0),
+                        ),
+                      ),
+                      if (_fotoKKUrl != null && _filePath == null)
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Image.network(
+                            _fotoKKUrl!,
+                            height: 150,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: 20),
+              GestureDetector(
+                onTap: _pickKtp,
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Column(
+                    children: [
+                      ListTile(
+                        leading: Icon(Icons.upload_file),
+                        title: Text(
+                          _filePathKtp == null
+                              ? 'Foto KTP'
+                              : 'File terpilih: ${_filePathKtp!.split('/').last}',
+                          style: TextStyle(fontSize: 14.0),
+                        ),
+                      ),
+                      if (_fotoKTPUrl != null && _filePathKtp == null)
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Image.network(
+                            _fotoKTPUrl!,
+                            height: 150,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _updateProfile,
                 style: ElevatedButton.styleFrom(
-                  primary: Color(0xFF1548AD),
+                  backgroundColor: Color(0xFF1548AD),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
                 child: Text(
@@ -342,35 +453,74 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
-  // Di dalam method _populateUserData di EditProfilePage
-  // Di dalam method _populateUserData di EditProfilePage
   Future<void> _populateUserData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? userDataString = prefs.getString('userData');
-    print("User data: $userDataString");
+    String? token = prefs.getString('token');
 
-    if (userDataString != null) {
-      Map<String, dynamic> userData = jsonDecode(userDataString);
+    if (token != null) {
+      try {
+        User? user = await getUserFromToken(token);
 
-      fullNameController.text = userData['penduduk']['nama_lengkap'] ?? '';
-      emailController.text = userData['email'] ?? '';
-      phoneNumberController.text = userData['penduduk']['no_hp'] ?? '';
-      alamatController.text = userData['penduduk']['alamat'] ?? '';
-      tgllahirController.text = userData['penduduk']['tanggal_lahir'] ?? '';
-      kebangsaanController.text = userData['penduduk']['kebangsaan'] ?? '';
-      pekerjaanController.text = userData['penduduk']['pekerjaan'] ?? '';
-      statusnikahController.text = userData['penduduk']['status_nikah'] ?? '';
-      nikController.text = userData['penduduk']['nik'] ?? '';
-      _selectedGender = userData['penduduk']['jenis_kelamin'];
-
-      // Mendapatkan id_user dari data pengguna
-      int userId = userData['id_user'] ?? 0; // Ubah menjadi id_user
-      // Gunakan id_user sesuai kebutuhan
-      print("ID User: $userId");
+        if (user != null) {
+          setState(() {
+            fullNameController.text = user.penduduk?.namaLengkap ?? '';
+            emailController.text = user.email;
+            phoneNumberController.text = user.penduduk?.noHp ?? '';
+            alamatController.text = user.penduduk?.alamat ?? '';
+            tempatLahirController.text = user.penduduk?.tempatLahir ?? '';
+            tgllahirController.text = user.penduduk?.tanggalLahir ?? '';
+            kebangsaanController.text = user.penduduk?.kebangsaan ?? '';
+            pekerjaanController.text = user.penduduk?.pekerjaan ?? '';
+            statusnikahController.text = user.penduduk?.statusNikah ?? '';
+            nikController.text = user.penduduk?.nik ?? '';
+            _selectedGender = user.penduduk?.jenisKelamin;
+            _fotoKKUrl = user.penduduk?.fotoKk;
+            _fotoKTPUrl = user.penduduk?.fotoKtp;
+          });
+        }
+      } catch (error) {
+        print("Error retrieving user data: $error");
+      }
+    } else {
+      print("Token not found");
     }
   }
 
-  Future<bool> _updateProfile() async {
+  Future<User?> getUserFromToken(String token) async {
+    try {
+      String url = "${ApiConfig.baseUrl}/api/get_user";
+
+      final response = await http.get(
+        Uri.parse(url),
+        headers: <String, String>{
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      print("Response getUserFromToken: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        if (responseData['status'] == true) {
+          final userData = responseData['user'];
+          if (userData != null) {
+            return User.fromJson(userData);
+          }
+        } else {
+          print("Failed to get user data: ${responseData['message']}");
+          return null;
+        }
+      } else {
+        print("Failed to get user data: ${response.statusCode}");
+        return null;
+      }
+    } catch (error) {
+      print("Error getting user data: $error");
+      return null;
+    }
+  }
+
+  Future<User?> _updateProfile() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('token');
 
@@ -378,7 +528,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
       String url = "${ApiConfig.baseUrl}/api/update_user";
 
       try {
-        // Mendapatkan user dari database lokal
         User? user = await DBHelper.getUserFromLocal(token);
         if (user != null) {
           final response = await http.put(
@@ -394,43 +543,133 @@ class _EditProfilePageState extends State<EditProfilePage> {
               'no_hp': phoneNumberController.text,
               'jenis_kelamin': _selectedGender,
               'alamat': alamatController.text,
+              'tempat_lahir': tempatLahirController.text,
               'tanggal_lahir': tgllahirController.text,
               'kebangsaan': kebangsaanController.text,
               'pekerjaan': pekerjaanController.text,
               'status_nikah': statusnikahController.text,
-              'nik': nikController.text
+              'nik': nikController.text,
             }),
           );
 
+          if (_filePath != null) {
+            _fotoKKUrl = await _uploadPhotoKK();
+          }
+
+          if (_filePathKtp != null) {
+            _fotoKTPUrl = await _uploadPhotoKTP();
+          }
+
           if (response.statusCode == 200) {
-            print("User data updated successfully");
+            User updatedUser = User(
+              id: user.id,
+              email: emailController.text,
+              role: user.role,
+              penduduk: Penduduk(
+                id: user.penduduk?.id ?? 0,
+                idUser: user.id,
+                namaLengkap: fullNameController.text,
+                noHp: phoneNumberController.text,
+                jenisKelamin: _selectedGender,
+                alamat: alamatController.text,
+                tempatLahir: tempatLahirController.text,
+                tanggalLahir: tgllahirController.text,
+                kebangsaan: kebangsaanController.text,
+                pekerjaan: pekerjaanController.text,
+                statusNikah: statusnikahController.text,
+                nik: nikController.text,
+              ),
+            );
 
-            // Memperbarui data penduduk
-            bool pendudukResult = await _updatePenduduk(user.id);
-
-            // Jika data penduduk berhasil diperbarui, tampilkan pesan sukses
-            if (pendudukResult) {
-              _showSuccessEdit();
-              return true;
-            } else {
-              print("Failed to update penduduk data");
-              return false;
-            }
+            await DBHelper.updateUser(updatedUser, token);
+            _populateUserData();
+            _showSuccessEdit();
+            return user;
           } else {
             print("Failed to update user data: ${response.body}");
-            return false;
+            return null;
           }
         } else {
           print("User not found in local database");
-          return false;
+          return null;
         }
       } catch (error) {
         print("Error updating user data: $error");
-        return false;
+        return null;
       }
     } else {
       print("Token not found");
-      return false;
+      return null;
+    }
+  }
+
+  Future<String?> _uploadPhotoKK() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+
+    if (token != null && _filePath != null) {
+      String url = "${ApiConfig.baseUrl}/api/upload_kk";
+
+      var request = http.MultipartRequest('POST', Uri.parse(url))
+        ..headers['Authorization'] = 'Bearer $token'
+        ..files.add(await http.MultipartFile.fromPath('foto_kk', _filePath!));
+
+      var response = await request.send();
+
+      if (response.statusCode == 200) {
+        var responseBody = await response.stream.bytesToString();
+        var responseData = jsonDecode(responseBody);
+
+        print("Response from server: $responseBody");
+
+        if (responseData.containsKey('foto_kk')) {
+          return responseData['foto_kk'];
+        } else {
+          print("Response does not contain 'foto_kk' key");
+          return null;
+        }
+      } else {
+        print("Failed to upload photo KK: ${response.statusCode}");
+        return null;
+      }
+    } else {
+      print("Token or file path not found");
+      return null;
+    }
+  }
+
+  Future<String?> _uploadPhotoKTP() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+
+    if (token != null && _filePathKtp != null) {
+      String url = "${ApiConfig.baseUrl}/api/upload_ktp";
+
+      var request = http.MultipartRequest('POST', Uri.parse(url))
+        ..headers['Authorization'] = 'Bearer $token'
+        ..files.add(await http.MultipartFile.fromPath('foto_ktp', _filePathKtp!));
+
+      var response = await request.send();
+
+      if (response.statusCode == 200) {
+        var responseBody = await response.stream.bytesToString();
+        var responseData = jsonDecode(responseBody);
+
+        print("Response from server: $responseBody");
+
+        if (responseData.containsKey('foto_ktp')) {
+          return responseData['foto_ktp'];
+        } else {
+          print("Response does not contain 'foto_ktp' key");
+          return null;
+        }
+      } else {
+        print("Failed to upload photo KTP: ${response.statusCode}");
+        return null;
+      }
+    } else {
+      print("Token or file path not found");
+      return null;
     }
   }
 
@@ -438,67 +677,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
     AwesomeDialog(
       context: context,
       dialogType: DialogType.success,
-      animType: AnimType.bottomSlide,
-      title: 'Profile Terbarui',
-      desc: 'Selamat profilmu sudah terbarui',
-      btnOkOnPress: () {},
+      animType: AnimType.scale,
+      title: 'Profile Terbaharui',
+      desc: 'Berhasil memperbarui data profil',
+      btnOkOnPress: () {
+        Navigator.pop(context, true);
+      },
     )..show();
-  }
-
-  Future<bool> _updatePenduduk(int userId) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('token');
-
-    if (token != null) {
-      String url = "${ApiConfig.baseUrl}/api/update_penduduk";
-
-      try {
-        final response = await http.put(
-          Uri.parse(url),
-          headers: <String, String>{
-            'Authorization': 'Bearer $token',
-            'Content-Type': 'application/json',
-          },
-          body: jsonEncode(<String, dynamic>{
-            'id_user': userId,
-            'nama_lengkap': fullNameController.text,
-            'no_hp': phoneNumberController.text,
-            'jenis_kelamin': _selectedGender,
-            'alamat': alamatController.text,
-            'tanggal_lahir': tgllahirController.text,
-            'kebangsaan': kebangsaanController.text,
-            'pekerjaan': pekerjaanController.text,
-            'status_nikah': statusnikahController.text,
-            'nik': nikController.text
-          }),
-        );
-
-        if (response.statusCode == 200) {
-          print("Penduduk data updated successfully");
-          return true;
-        } else {
-          print("Failed to update penduduk data: ${response.body}");
-          return false;
-        }
-      } catch (error) {
-        print("Error updating penduduk data: $error");
-        return false;
-      }
-    } else {
-      print("Token not found");
-      return false;
-    }
-  }
-
-  void _showSuccessDialog(String message) {
-    AwesomeDialog(
-      context: context,
-      dialogType: DialogType.success,
-      animType: AnimType.bottomSlide,
-      title: 'Error',
-      desc: message,
-      btnOkOnPress: () {},
-    ).show();
   }
 
   void _showErrorDialog(String message) {

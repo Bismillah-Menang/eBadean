@@ -47,10 +47,8 @@ class _RegisterState extends State<Register> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString('registeredEmail', email);
 
-    // Send verification email
     _sendVerificationEmail(email, password, role, verificationCode);
 
-    // Navigate to verification page
     _navigateToEmailVerification(email, password, role, verificationCode);
   }
 
@@ -68,6 +66,12 @@ class _RegisterState extends State<Register> {
     try {
       final sendReport = await send(message, smtpServer);
       print('Message sent: ' + sendReport.toString());
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Kode OTP berhasil dikirim ke email Anda'),
+          backgroundColor: Colors.green,
+        ),
+      );
     } catch (e) {
       print('Error sending email: $e');
     }
@@ -75,8 +79,7 @@ class _RegisterState extends State<Register> {
 
   String _generateOTP() {
     Random random = Random();
-    return (1000 + random.nextInt(9000))
-        .toString(); 
+    return (1000 + random.nextInt(9000)).toString();
   }
 
   void _showAlertDialog(String title, String message) {
@@ -108,8 +111,7 @@ class _RegisterState extends State<Register> {
           email: email,
           password: password,
           role: role,
-          verificationCode:
-              verificationCode, 
+          verificationCode: verificationCode,
         ),
       ),
     );
@@ -120,7 +122,7 @@ class _RegisterState extends State<Register> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Create Account',
+          'Buat Akun',
           textAlign: TextAlign.left,
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
@@ -137,8 +139,8 @@ class _RegisterState extends State<Register> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'If you do not have an account, you can register with a new one',
-                  style: TextStyle(fontSize: 14.0),
+                  'Jika Anda belum memiliki akun, Anda dapat mendaftar dengan akun baru',
+                  style: TextStyle(fontSize: 14.0, fontFamily: 'Poppins'),
                 ),
                 SizedBox(height: 20.0),
                 TextFormField(
@@ -217,14 +219,14 @@ class _RegisterState extends State<Register> {
                 ElevatedButton(
                   onPressed: _registerUser,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue, 
+                    backgroundColor: Color(0xFF1548AD),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.0),
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    padding: EdgeInsets.symmetric(vertical: 12.0),
+                    padding: EdgeInsets.symmetric(vertical: 10),
                   ),
                   child: Text(
-                    'Register',
+                    'REGISTER',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16.0,
@@ -237,7 +239,8 @@ class _RegisterState extends State<Register> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Already have an account?',
+                      'Sudah punya akun?',
+                      style: TextStyle(fontSize: 14.0, fontFamily: 'Poppins'),
                     ),
                     SizedBox(width: 5.0),
                     GestureDetector(
@@ -250,10 +253,11 @@ class _RegisterState extends State<Register> {
                         );
                       },
                       child: Text(
-                        'Login here',
+                        'Login disini',
                         style: TextStyle(
                           color: Color(0xFF1548AD),
                           fontWeight: FontWeight.bold,
+                          fontFamily: 'Poppins',
                         ),
                       ),
                     ),

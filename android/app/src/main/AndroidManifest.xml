@@ -2,10 +2,14 @@
     package="com.example.ebadean">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.CAMERA"/> 
+    <uses-feature android:name="android.hardware.camera" android:required="true" />
     
     <application
-        android:label="e_badean"
+        android:label="eBadean"
         android:name="${applicationName}"
+        android:usesCleartextTraffic="true"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

@@ -11,12 +11,14 @@ class Berita {
   late String judul_berita;
   late Uint8List foto_berita;
   late String isi_berita;
+  late String sumber;
   late String tgl_berita;
 
   Berita({
     required this.judul_berita,
     required this.foto_berita,
     required this.isi_berita,
+    required this.sumber,
     required this.tgl_berita,
   });
 
@@ -35,4 +37,13 @@ class BeritaList {
   factory BeritaList.fromJson(Map<String, dynamic> json) =>
       _$BeritaListFromJson(json);
   Map<String, dynamic> toJson() => _$BeritaListToJson(this);
+
+  List<Berita> filterByJudul(String query) {
+    return data
+            ?.where((berita) => berita.judul_berita
+                .toLowerCase()
+                .startsWith(query.toLowerCase()))
+            ?.toList() ??
+        [];
+  }
 }

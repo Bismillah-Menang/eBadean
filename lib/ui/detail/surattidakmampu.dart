@@ -1,6 +1,6 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:e_badean/database/db_helper.dart';
-import 'package:e_badean/ui/detail/surattidakmampu2.dart';
+import 'package:e_badean/ui/detail/pengajuanoranglain.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -25,14 +25,15 @@ class _SuratKeteranganTidakMampuState extends State<SuratKeteranganTidakMampu> {
   final TextEditingController sekolahController = TextEditingController();
   final TextEditingController alamatController = TextEditingController();
   final TextEditingController namaOrangTuaController = TextEditingController();
-  final TextEditingController pekerjaanController = TextEditingController();
+  final TextEditingController pekerjaanortuController = TextEditingController();
   final TextEditingController alamatortuController = TextEditingController();
-  final TextEditingController noKkController = TextEditingController();
 
   String _jenisKelamin = '';
   String _jenisKelaminOrangTua = '';
   DateTime? _pickedDate;
-  String? _filePath;
+  String? _fotoKKUrl;
+  String? _fotoKTPUrl;
+  String? _filePathSPRT;
 
   late Future<Formulir?> _formulirFuture;
 
@@ -59,40 +60,97 @@ class _SuratKeteranganTidakMampuState extends State<SuratKeteranganTidakMampu> {
   }
 
   Future<void> _populateUserData() async {
-    User? user = await _getUserFromLocal();
-    if (user != null) {
-      setState(() {
-        // namaController.text = user.nama_lengkap;
-        // alamatController.text = user.alamat ?? '';
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
 
-        // if (user.tanggal_lahir != null) {
-        //   final dateParts = user.tanggal_lahir!.split('-');
-        //   if (dateParts.length == 3) {
-        //     _pickedDate = DateTime(
-        //       int.parse(dateParts[2]),
-        //       int.parse(dateParts[1]),
-        //       int.parse(dateParts[0]),
-        //     );
-        //     tanggalLahirController.text =
-        //         DateFormat('dd-MM-yyyy').format(_pickedDate!);
-        //   }
-        // }
+    if (token != null) {
+      try {
+        User? user = await getUserFromToken(token);
 
-        // if (user.jenis_kelamin != null) {
-        //   _jenisKelamin = user.jenis_kelamin!;
-        // } else {
-        //   _jenisKelamin = '';
-        // }
-      });
+        if (user != null) {
+          setState(() {
+            namaController.text = user.penduduk?.namaLengkap ?? '';
+            alamatController.text = user.penduduk?.alamat ?? '';
+            tempatLahirController.text = user.penduduk?.tempatLahir ?? '';
+            tanggalLahirController.text = user.penduduk?.tanggalLahir ?? '';
+            _jenisKelamin = user.penduduk?.jenisKelamin ?? '';
+            _fotoKKUrl = user.penduduk?.fotoKk;
+            _fotoKTPUrl = user.penduduk?.fotoKtp;
+          });
+        }
+      } catch (error) {
+        print("Error retrieving user data: $error");
+      }
+    } else {
+      print("Token not found");
     }
   }
 
-  Future<User?> _getUserFromLocal() async {
+  Future<User?> getUserFromToken(String token) async {
+    try {
+      String url = "${ApiConfig.baseUrl}/api/get_user";
+
+      final response = await http.get(
+        Uri.parse(url),
+        headers: <String, String>{
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      print("Response getUserFromToken: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        if (responseData['status'] == true) {
+          final userData = responseData['user'];
+          if (userData != null) {
+            return User.fromJson(userData);
+          }
+        } else {
+          print("Failed to get user data: ${responseData['message']}");
+          return null;
+        }
+      } else {
+        print("Failed to get user data: ${response.statusCode}");
+        return null;
+      }
+    } catch (error) {
+      print("Error getting user data: $error");
+      return null;
+    }
+  }
+
+  Future<String?> _uploadPhotoSPRT() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('token');
-    if (token != null) {
-      return DBHelper.getUserFromLocal(token);
+
+    if (token != null && _filePathSPRT != null) {
+      String url = "${ApiConfig.baseUrl}/api/upload_sprt";
+
+      var request = http.MultipartRequest('POST', Uri.parse(url))
+        ..headers['Authorization'] = 'Bearer $token'
+        ..files.add(await http.MultipartFile.fromPath('value', _filePathSPRT!));
+
+      var response = await request.send();
+
+      if (response.statusCode == 200) {
+        var responseBody = await response.stream.bytesToString();
+        var responseData = jsonDecode(responseBody);
+
+        print("Response from server: $responseBody");
+
+        if (responseData.containsKey('value')) {
+          return responseData['value'];
+        } else {
+          print("Response does not contain 'path' key");
+          return null;
+        }
+      } else {
+        print("Failed to upload file: ${response.statusCode}");
+        return null;
+      }
     } else {
+      print("No file selected");
       return null;
     }
   }
@@ -104,7 +162,8 @@ class _SuratKeteranganTidakMampuState extends State<SuratKeteranganTidakMampu> {
       if (token != null) {
         User? user = await DBHelper.getUserFromLocal(token);
         if (user != null) {
-          data['id_penduduk'] = user.id;
+          data['id_penduduk'] = user.penduduk?.id;
+
           final response = await http.post(
             Uri.parse('${ApiConfig.baseUrl}/api/pengajuan'),
             headers: {
@@ -115,24 +174,37 @@ class _SuratKeteranganTidakMampuState extends State<SuratKeteranganTidakMampu> {
           );
 
           if (response.statusCode == 201) {
-            print('Data berhasil dikirim');
+            print('Data berhasil dikirim: ${response.body}');
             AwesomeDialog(
               context: context,
               dialogType: DialogType.success,
               animType: AnimType.bottomSlide,
+              titleTextStyle: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold),
               title: 'Sukses',
               desc: 'Data formulir berhasil dikirim!',
+              descTextStyle: TextStyle(fontFamily: 'Poppins'),
               btnOkOnPress: () {
                 Navigator.pop(context);
               },
             )..show();
           } else {
+            print('Error response: ${response.body}');
             AwesomeDialog(
               context: context,
               dialogType: DialogType.error,
               animType: AnimType.bottomSlide,
+              titleTextStyle: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold),
               title: 'Gagal',
-              desc: 'Gagal mengirim formulir, silakan coba lagi.',
+              desc: 'Gagal mengirim formulir, anda masih memiliki pengajuan yang masih Diproses.',
+              descTextStyle: TextStyle(fontFamily: 'Poppins'),
+              btnOkOnPress: () {},
+              btnOkColor: Colors.red,
             )..show();
           }
         } else {
@@ -151,7 +223,7 @@ class _SuratKeteranganTidakMampuState extends State<SuratKeteranganTidakMampu> {
 
     if (result != null) {
       setState(() {
-        _filePath = result.files.single.path;
+        _filePathSPRT = result.files.single.path;
       });
     }
   }
@@ -180,7 +252,12 @@ class _SuratKeteranganTidakMampuState extends State<SuratKeteranganTidakMampu> {
             } else if (snapshot.hasError) {
               return Center(child: Text('Error: ${snapshot.error}'));
             } else if (!snapshot.hasData || snapshot.data == null) {
-              return Center(child: Text('Data formulir kosong'));
+              return Center(
+                child: Text(
+                  'Data formulir kosong',
+                  style: TextStyle(fontFamily: 'Poppins', fontSize: 14),
+                ),
+              );
             } else {
               return Form(
                 key: _formKey,
@@ -200,7 +277,7 @@ class _SuratKeteranganTidakMampuState extends State<SuratKeteranganTidakMampu> {
                     TextFormField(
                       controller: namaController,
                       decoration: InputDecoration(
-                        labelText: 'Nama',
+                        labelText: 'Nama Lengkap',
                         labelStyle: TextStyle(fontSize: 14.0),
                         prefixIcon: Icon(Icons.person),
                         border: OutlineInputBorder(
@@ -271,7 +348,7 @@ class _SuratKeteranganTidakMampuState extends State<SuratKeteranganTidakMampu> {
                           child: RadioListTile<String>(
                             contentPadding: EdgeInsets.zero,
                             title: Text(
-                              'Laki-laki',
+                              'Laki-Laki',
                               style: TextStyle(
                                 fontSize: 14.0,
                                 fontFamily: 'Poppins',
@@ -311,7 +388,7 @@ class _SuratKeteranganTidakMampuState extends State<SuratKeteranganTidakMampu> {
                     TextFormField(
                       controller: sekolahController,
                       decoration: InputDecoration(
-                        labelText: 'Sekolah',
+                        labelText: 'Asal Sekolah',
                         labelStyle: TextStyle(fontSize: 14.0),
                         prefixIcon: Icon(Icons.school),
                         border: OutlineInputBorder(
@@ -384,13 +461,14 @@ class _SuratKeteranganTidakMampuState extends State<SuratKeteranganTidakMampu> {
                           ? 'Nama Orang Tua tidak boleh kosong'
                           : null,
                     ),
+                    SizedBox(height: 5),
                     Row(
                       children: <Widget>[
                         Expanded(
                           child: RadioListTile<String>(
                             contentPadding: EdgeInsets.zero,
                             title: Text(
-                              'Laki-laki',
+                              'Laki-Laki',
                               style: TextStyle(
                                 fontSize: 14.0,
                                 fontFamily: 'Poppins',
@@ -428,7 +506,7 @@ class _SuratKeteranganTidakMampuState extends State<SuratKeteranganTidakMampu> {
                     ),
                     SizedBox(height: 5),
                     TextFormField(
-                      controller: pekerjaanController,
+                      controller: pekerjaanortuController,
                       decoration: InputDecoration(
                         labelText: 'Pekerjaan',
                         labelStyle: TextStyle(fontSize: 14.0),
@@ -471,148 +549,130 @@ class _SuratKeteranganTidakMampuState extends State<SuratKeteranganTidakMampu> {
                       validator: (value) =>
                           value!.isEmpty ? 'Alamat tidak boleh kosong' : null,
                     ),
-                    SizedBox(height: 20),
-                    // Field baru untuk No KK
-                    TextFormField(
-                      controller: noKkController,
-                      decoration: InputDecoration(
-                        labelText: 'No KK',
-                        labelStyle: TextStyle(fontSize: 14.0),
-                        prefixIcon: Icon(Icons.account_box),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide: BorderSide(color: Colors.grey),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide: BorderSide(
-                            color: Color(0xFF1548AD),
-                          ),
-                        ),
-                        contentPadding: EdgeInsets.symmetric(vertical: 10.0),
-                      ),
-                      validator: (value) =>
-                          value!.isEmpty ? 'No KK tidak boleh kosong' : null,
+                    SizedBox(height: 40),
+                    Text(
+                      "Surat Pengantar RT: ",
+                      style: TextStyle(
+                          fontSize: 15,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black),
+                      textAlign: TextAlign.start,
                     ),
-                    SizedBox(height: 20),
-                    // Widget untuk mengunggah foto/file KK
+                    SizedBox(height: 15),
                     GestureDetector(
                       onTap: _pickFile,
                       child: Container(
-                        padding: EdgeInsets.symmetric(vertical: 10.0),
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.grey),
                           borderRadius: BorderRadius.circular(15),
                         ),
-                        child: ListTile(
-                          leading: Icon(Icons.upload_file),
-                          title: Text(
-                            _filePath == null
-                                ? 'Unggah Foto/Scan KK'
-                                : 'File terpilih: ${_filePath!.split('/').last}',
-                            style: TextStyle(fontSize: 14.0),
-                          ),
+                        child: Column(
+                          children: [
+                            ListTile(
+                              leading: Icon(Icons.upload_file),
+                              title: Text(
+                                _filePathSPRT == null
+                                    ? 'Bukti verifikasi'
+                                    : 'File terpilih: ${_filePathSPRT!.split('/').last}',
+                                style: TextStyle(fontSize: 14.0),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
                     SizedBox(height: 20),
                     ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  SuratKeteranganTidakMampu2()),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF1548AD),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                      ),
-                      child: Text(
-                        'TAMBAHKAN DATA PENGGUNA',
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 14.0,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-
-                    SizedBox(height: 5),
-                    ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         if (_formKey.currentState!.validate()) {
-                          String nama = namaController.text;
-                          String tempatLahir = tempatLahirController.text;
-                          String tanggalLahir = tanggalLahirController.text;
-                          String sekolah = sekolahController.text;
-                          String alamat = alamatController.text;
-                          String namaOrangTua = namaOrangTuaController.text;
-                          String pekerjaan = pekerjaanController.text;
-                          String alamatOrtu = alamatortuController.text;
+                          final uploadedFilePath = await _uploadPhotoSPRT();
+                          if (uploadedFilePath != null) {
+                            String nama = namaController.text;
+                            String tempatLahir = tempatLahirController.text;
+                            String tanggalLahir = tanggalLahirController.text;
+                            String sekolah = sekolahController.text;
+                            String alamat = alamatController.text;
+                            String namaOrangTua = namaOrangTuaController.text;
+                            String alamatOrtu = alamatortuController.text;
+                            String pekerjaanortu = pekerjaanortuController.text;
 
-                          String jenisKelamin = _jenisKelamin;
-                          String jenisKelaminOrtu = _jenisKelaminOrangTua;
+                            String jenisKelamin = _jenisKelamin;
+                            String jenisKelaminOrtu = _jenisKelaminOrangTua;
 
-                          Map<String, dynamic> data = {
-                            'id_layanan': 1,
-                            'tgl_pengajuan':
-                                DateFormat('yyyy-MM-dd').format(DateTime.now()),
-                            'status': 'Diproses',
-                            'catatan': 'Menunggu verifikasi dokumen',
-                            'id_rt': null,
-                            'id_rw': null,
-                            'id_admin': null,
-                            'fields': [
-                              {'nama_field': 'Nama', 'value': nama},
-                              {
-                                'nama_field': 'Tempat Lahir',
-                                'value': tempatLahir
-                              },
-                              {
-                                'nama_field': 'Tanggal Lahir',
-                                'value': tanggalLahir
-                              },
-                              {
-                                'nama_field': 'Jenis Kelamin',
-                                'value': jenisKelamin
-                              },
-                              {'nama_field': 'Sekolah', 'value': sekolah},
-                              {'nama_field': 'Alamat', 'value': alamat},
-                              {
-                                'nama_field': 'Nama Orang Tua',
-                                'value': namaOrangTua
-                              },
-                              {
-                                'nama_field': 'Jenis Kelamin Orang Tua',
-                                'value': jenisKelaminOrtu
-                              },
-                              {'nama_field': 'Pekerjaan', 'value': pekerjaan},
-                              {
-                                'nama_field': 'Alamat Orang Tua',
-                                'value': alamatOrtu
-                              },
-                            ],
-                          };
+                            String fullPath = "${ApiConfig.baseUrl}/storage/" +
+                                uploadedFilePath;
 
-                          _kirimDataPengajuan(data);
+                            Map<String, dynamic> data = {
+                              'id_layanan': 1,
+                              'tgl_pengajuan': DateFormat('yyyy-MM-dd')
+                                  .format(DateTime.now()),
+                              'status': 'Diproses',
+                              'catatan': 'Menunggu verifikasi dokumen',
+                              'id_rt': null,
+                              'id_admin': null,
+                              'fields': [
+                                {'nama_field': 'Nama', 'value': nama},
+                                {
+                                  'nama_field': 'Tempat Lahir',
+                                  'value': tempatLahir
+                                },
+                                {
+                                  'nama_field': 'Tanggal Lahir',
+                                  'value': tanggalLahir
+                                },
+                                {
+                                  'nama_field': 'Jenis Kelamin',
+                                  'value': jenisKelamin
+                                },
+                                {'nama_field': 'Sekolah', 'value': sekolah},
+                                {'nama_field': 'Alamat', 'value': alamat},
+                                {
+                                  'nama_field': 'Nama Orang Tua',
+                                  'value': namaOrangTua,
+                                },
+                                {
+                                  'nama_field': 'Jenis Kelamin Orang Tua',
+                                  'value': jenisKelaminOrtu,
+                                },
+                                {
+                                  'nama_field': 'Pekerjaan Orang Tua',
+                                  'value': pekerjaanortu
+                                },
+                                {
+                                  'nama_field': 'Alamat Orang Tua',
+                                  'value': alamatOrtu
+                                },
+                                {'nama_field': 'Foto KK', 'value': _fotoKKUrl},
+                                {
+                                  'nama_field': 'Foto KTP',
+                                  'value': _fotoKTPUrl
+                                },
+                                {
+                                  'nama_field': 'Bukti verifikasi RT',
+                                  'value': fullPath
+                                },
+                              ],
+                            };
+
+                            _kirimDataPengajuan(data);
+                          } else {
+                            print('Gagal mendapatkan path file SPRT');
+                          }
                         }
                       },
                       child: Text(
                         "KIRIM",
                         style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Poppins'),
+                          fontSize: 16,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Poppins',
+                        ),
                       ),
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
+                          borderRadius: BorderRadius.circular(10),
                         ),
                         padding: EdgeInsets.symmetric(vertical: 10),
                         backgroundColor: Color.fromRGBO(29, 216, 163, 80),

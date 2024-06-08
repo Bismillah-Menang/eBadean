@@ -11,6 +11,7 @@ Berita _$BeritaFromJson(Map<String, dynamic> json) => Berita(
       foto_berita: base64Decode(
           json['foto_berita'] as String), // Decode base64 menjadi Uint8List
       isi_berita: json['isi_berita'] as String,
+      sumber: json['sumber'] as String,
       tgl_berita: json['tgl_berita'] as String,
     )..id = json['id'] as int?;
 
@@ -20,6 +21,7 @@ Map<String, dynamic> _$BeritaToJson(Berita instance) => <String, dynamic>{
       'foto_berita':
           base64Encode(instance.foto_berita), // Encode Uint8List menjadi base64
       'isi_berita': instance.isi_berita,
+      'sumber': instance.sumber,
       'tgl_berita': instance.tgl_berita,
     };
 

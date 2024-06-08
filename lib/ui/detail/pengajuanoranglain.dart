@@ -8,15 +8,14 @@ import 'package:e_badean/ip.dart';
 import 'package:e_badean/models/user.dart';
 import 'package:e_badean/models/formulir.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:file_picker/file_picker.dart'; 
+import 'package:file_picker/file_picker.dart';
 
-class SuratKeteranganTidakMampu2 extends StatefulWidget {
+class PengajuanOrangLain extends StatefulWidget {
   @override
-  _SuratKeteranganTidakMampuState2 createState() =>
-      _SuratKeteranganTidakMampuState2();
+  _PengajuanOrangLainState createState() => _PengajuanOrangLainState();
 }
 
-class _SuratKeteranganTidakMampuState2 extends State<SuratKeteranganTidakMampu2> {
+class _PengajuanOrangLainState extends State<PengajuanOrangLain> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController namaController = TextEditingController();
   final TextEditingController tempatLahirController = TextEditingController();
@@ -26,20 +25,22 @@ class _SuratKeteranganTidakMampuState2 extends State<SuratKeteranganTidakMampu2>
   final TextEditingController namaOrangTuaController = TextEditingController();
   final TextEditingController pekerjaanController = TextEditingController();
   final TextEditingController alamatortuController = TextEditingController();
-   final TextEditingController noKkController = TextEditingController();
+  final TextEditingController nikController = TextEditingController();
 
   String _jenisKelamin = '';
   String _jenisKelaminOrangTua = '';
   DateTime? _pickedDate;
-  String? _filePath;
+  String? _fotoKKUrl;
+  String? _filePathSPRT;
+  String? _filePathKtp;
 
   late Future<Formulir?> _formulirFuture;
 
   @override
   void initState() {
     super.initState();
-    _formulirFuture = fetchFormulirData();
     _populateUserData();
+    _formulirFuture = fetchFormulirData();
   }
 
   Future<Formulir?> fetchFormulirData() async {
@@ -55,45 +56,6 @@ class _SuratKeteranganTidakMampuState2 extends State<SuratKeteranganTidakMampu2>
       throw Exception('Failed to load data');
     }
     return null;
-  }
-
-  Future<void> _populateUserData() async {
-    User? user = await _getUserFromLocal();
-    if (user != null) {
-      setState(() {
-        // namaController.text = user.nama_lengkap;
-        // alamatController.text = user.alamat ?? '';
-
-        // if (user.tanggal_lahir != null) {
-        //   final dateParts = user.tanggal_lahir!.split('-');
-        //   if (dateParts.length == 3) {
-        //     _pickedDate = DateTime(
-        //       int.parse(dateParts[2]),
-        //       int.parse(dateParts[1]),
-        //       int.parse(dateParts[0]),
-        //     );
-        //     tanggalLahirController.text =
-        //         DateFormat('dd-MM-yyyy').format(_pickedDate!);
-        //   }
-        // }
-
-        // if (user.jenis_kelamin != null) {
-        //   _jenisKelamin = user.jenis_kelamin!;
-        // } else {
-        //   _jenisKelamin = '';
-        // }
-      });
-    }
-  }
-
-  Future<User?> _getUserFromLocal() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('token');
-    if (token != null) {
-      return DBHelper.getUserFromLocal(token);
-    } else {
-      return null;
-    }
   }
 
   Future<void> _kirimDataPengajuan(Map<String, dynamic> data) async {
@@ -122,7 +84,7 @@ class _SuratKeteranganTidakMampuState2 extends State<SuratKeteranganTidakMampu2>
               title: 'Sukses',
               desc: 'Data formulir berhasil dikirim!',
               btnOkOnPress: () {
-                Navigator.pop(context);
+                Navigator.pushNamed(context, '/bottomnav');
               },
             )..show();
           } else {
@@ -144,31 +106,164 @@ class _SuratKeteranganTidakMampuState2 extends State<SuratKeteranganTidakMampu2>
       print('Error mengirim data pengajuan: $error');
     }
   }
-  
+
+  Future<void> _populateUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+
+    if (token != null) {
+      try {
+        User? user = await getUserFromToken(token);
+
+        if (user != null) {
+          setState(() {
+            _fotoKKUrl = user.penduduk?.fotoKk;
+          });
+        }
+      } catch (error) {
+        print("Error retrieving user data: $error");
+      }
+    } else {
+      print("Token not found");
+    }
+  }
+
+  Future<User?> getUserFromToken(String token) async {
+    try {
+      String url = "${ApiConfig.baseUrl}/api/get_user";
+
+      final response = await http.get(
+        Uri.parse(url),
+        headers: <String, String>{
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      print("Response getUserFromToken: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        if (responseData['status'] == true) {
+          final userData = responseData['user'];
+          if (userData != null) {
+            return User.fromJson(userData);
+          }
+        } else {
+          print("Failed to get user data: ${responseData['message']}");
+          return null;
+        }
+      } else {
+        print("Failed to get user data: ${response.statusCode}");
+        return null;
+      }
+    } catch (error) {
+      print("Error getting user data: $error");
+      return null;
+    }
+  }
+
   Future<void> _pickFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
 
     if (result != null) {
       setState(() {
-        _filePath = result.files.single.path;
+        _filePathKtp = result.files.single.path;
       });
     }
   }
 
+  Future<void> _pickSPRT() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+    if (result != null) {
+      setState(() {
+        _filePathSPRT = result.files.single.path;
+      });
+    }
+  }
+
+  Future<String?> _uploadPhotoKTP() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+
+    if (token != null && _filePathSPRT != null) {
+      String url = "${ApiConfig.baseUrl}/api/upload_ktpo";
+
+      var request = http.MultipartRequest('POST', Uri.parse(url))
+        ..headers['Authorization'] = 'Bearer $token'
+        ..files.add(await http.MultipartFile.fromPath('value', _filePathKtp!));
+
+      var response = await request.send();
+
+      if (response.statusCode == 200) {
+        var responseBody = await response.stream.bytesToString();
+        var responseData = jsonDecode(responseBody);
+
+        print("Response from server: $responseBody");
+
+        if (responseData.containsKey('value')) {
+          return responseData['value'];
+        } else {
+          print("Response does not contain 'path' key");
+          return null;
+        }
+      } else {
+        print("Failed to upload file: ${response.statusCode}");
+        return null;
+      }
+    } else {
+      print("No file selected");
+      return null;
+    }
+  }
+
+  Future<String?> _uploadPhotoSPRT() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+
+    if (token != null && _filePathSPRT != null) {
+      String url = "${ApiConfig.baseUrl}/api/upload_sprt";
+
+      var request = http.MultipartRequest('POST', Uri.parse(url))
+        ..headers['Authorization'] = 'Bearer $token'
+        ..files.add(await http.MultipartFile.fromPath('value', _filePathSPRT!));
+
+      var response = await request.send();
+
+      if (response.statusCode == 200) {
+        var responseBody = await response.stream.bytesToString();
+        var responseData = jsonDecode(responseBody);
+
+        print("Response from server: $responseBody");
+
+        if (responseData.containsKey('value')) {
+          return responseData['value'];
+        } else {
+          print("Response does not contain 'path' key");
+          return null;
+        }
+      } else {
+        print("Failed to upload file: ${response.statusCode}");
+        return null;
+      }
+    } else {
+      print("No file selected");
+      return null;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'KIRIM UNTUK PENGGUNA LAIN',
+          'Pengajuan Untuk Orang Lain',
           style: TextStyle(
             fontSize: 18.0,
             fontFamily: 'Poppins',
             fontWeight: FontWeight.bold,
           ),
         ),
-        centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
@@ -242,27 +337,50 @@ class _SuratKeteranganTidakMampuState2 extends State<SuratKeteranganTidakMampu2>
                           : null,
                     ),
                     SizedBox(height: 20),
-                    TextFormField(
-                      controller: tanggalLahirController,
-                      decoration: InputDecoration(
-                        labelText: 'Tanggal Lahir',
-                        labelStyle: TextStyle(fontSize: 14.0),
-                        prefixIcon: Icon(Icons.calendar_today),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide: BorderSide(color: Colors.grey),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide: BorderSide(
-                            color: Color(0xFF1548AD),
+                    InkWell(
+                      onTap: () async {
+                        DateTime? pickedDate = await showDatePicker(
+                          context: context,
+                          initialDate: _pickedDate ?? DateTime.now(),
+                          firstDate: DateTime(1900),
+                          lastDate: DateTime(2100),
+                        );
+
+                        if (pickedDate != null) {
+                          setState(() {
+                            _pickedDate = pickedDate;
+                            tanggalLahirController.text =
+                                DateFormat('dd-MM-yyyy').format(pickedDate);
+                          });
+                        }
+                      },
+                      child: IgnorePointer(
+                        child: TextFormField(
+                          controller: tanggalLahirController,
+                          decoration: InputDecoration(
+                            labelText: 'Masukkan tanggal lahir',
+                            prefixIcon: Icon(Icons.calendar_today),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(15),
+                              borderSide: BorderSide(color: Colors.grey),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(15),
+                              borderSide: BorderSide(
+                                color: Color(0xFF1548AD),
+                              ),
+                            ),
+                            contentPadding:
+                                EdgeInsets.symmetric(vertical: 10.0),
                           ),
+                          validator: (value) {
+                            if (value!.isEmpty) {
+                              return 'Tanggal lahir harus diisi';
+                            }
+                            return null;
+                          },
                         ),
-                        contentPadding: EdgeInsets.symmetric(vertical: 10.0),
                       ),
-                      validator: (value) => value!.isEmpty
-                          ? 'Tanggal Lahir tidak boleh kosong'
-                          : null,
                     ),
                     SizedBox(height: 5),
                     Row(
@@ -271,7 +389,7 @@ class _SuratKeteranganTidakMampuState2 extends State<SuratKeteranganTidakMampu2>
                           child: RadioListTile<String>(
                             contentPadding: EdgeInsets.zero,
                             title: Text(
-                              'Laki-laki',
+                              'Laki-Laki',
                               style: TextStyle(
                                 fontSize: 14.0,
                                 fontFamily: 'Poppins',
@@ -351,6 +469,28 @@ class _SuratKeteranganTidakMampuState2 extends State<SuratKeteranganTidakMampu2>
                       validator: (value) =>
                           value!.isEmpty ? 'Alamat tidak boleh kosong' : null,
                     ),
+                    SizedBox(height: 20),
+                    TextFormField(
+                      controller: nikController,
+                      decoration: InputDecoration(
+                        labelText: 'NIK',
+                        labelStyle: TextStyle(fontSize: 14.0),
+                        prefixIcon: Icon(Icons.badge),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                          borderSide: BorderSide(color: Colors.grey),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                          borderSide: BorderSide(
+                            color: Color(0xFF1548AD),
+                          ),
+                        ),
+                        contentPadding: EdgeInsets.symmetric(vertical: 10.0),
+                      ),
+                      validator: (value) =>
+                          value!.isEmpty ? 'Alamat tidak boleh kosong' : null,
+                    ),
                     SizedBox(height: 40),
                     Text(
                       "Data Orang Tua: ",
@@ -390,7 +530,7 @@ class _SuratKeteranganTidakMampuState2 extends State<SuratKeteranganTidakMampu2>
                           child: RadioListTile<String>(
                             contentPadding: EdgeInsets.zero,
                             title: Text(
-                              'Laki-laki',
+                              'Laki-Laki',
                               style: TextStyle(
                                 fontSize: 14.0,
                                 fontFamily: 'Poppins',
@@ -472,34 +612,9 @@ class _SuratKeteranganTidakMampuState2 extends State<SuratKeteranganTidakMampu2>
                           value!.isEmpty ? 'Alamat tidak boleh kosong' : null,
                     ),
                     SizedBox(height: 20),
-                    // Field baru untuk No KK
-                    TextFormField(
-                      controller: noKkController,
-                      decoration: InputDecoration(
-                        labelText: 'No KK',
-                        labelStyle: TextStyle(fontSize: 14.0),
-                        prefixIcon: Icon(Icons.account_box),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide: BorderSide(color: Colors.grey),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide: BorderSide(
-                            color: Color(0xFF1548AD),
-                          ),
-                        ),
-                        contentPadding: EdgeInsets.symmetric(vertical: 10.0),
-                      ),
-                      validator: (value) =>
-                          value!.isEmpty ? 'No KK tidak boleh kosong' : null,
-                    ),
-                    SizedBox(height: 20),
-                    // Widget untuk mengunggah foto/file KK
                     GestureDetector(
                       onTap: _pickFile,
                       child: Container(
-                        padding: EdgeInsets.symmetric(vertical: 10.0),
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.grey),
                           borderRadius: BorderRadius.circular(15),
@@ -507,72 +622,116 @@ class _SuratKeteranganTidakMampuState2 extends State<SuratKeteranganTidakMampu2>
                         child: ListTile(
                           leading: Icon(Icons.upload_file),
                           title: Text(
-                            _filePath == null
-                                ? 'Unggah Foto/Scan KK'
-                                : 'File terpilih: ${_filePath!.split('/').last}',
+                            _filePathKtp == null
+                                ? 'Fotok KTP'
+                                : 'File terpilih: ${_filePathKtp!.split('/').last}',
                             style: TextStyle(fontSize: 14.0),
                           ),
                         ),
                       ),
                     ),
-                    SizedBox(height: 5),
+                    SizedBox(height: 20),
+                    GestureDetector(
+                      onTap: _pickSPRT,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: ListTile(
+                          leading: Icon(Icons.upload_file),
+                          title: Text(
+                            _filePathSPRT == null
+                                ? 'Bukti Verifikasi'
+                                : 'File terpilih: ${_filePathSPRT!.split('/').last}',
+                            style: TextStyle(fontSize: 14.0),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20),
                     ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         if (_formKey.currentState!.validate()) {
-                          String nama = namaController.text;
-                          String tempatLahir = tempatLahirController.text;
-                          String tanggalLahir = tanggalLahirController.text;
-                          String sekolah = sekolahController.text;
-                          String alamat = alamatController.text;
-                          String namaOrangTua = namaOrangTuaController.text;
-                          String pekerjaan = pekerjaanController.text;
-                          String alamatOrtu = alamatortuController.text;
+                          String? pathSPRT = await _uploadPhotoSPRT();
+                          String? pathKtp = await _uploadPhotoKTP();
 
-                          String jenisKelamin = _jenisKelamin;
-                          String jenisKelaminOrtu = _jenisKelaminOrangTua;
+                          if (pathSPRT != null && pathKtp != null) {
+                            String nama = namaController.text;
+                            String tempatLahir = tempatLahirController.text;
+                            String tanggalLahir = tanggalLahirController.text;
+                            String sekolah = sekolahController.text;
+                            String alamat = alamatController.text;
+                            String nik = nikController.text;
+                            String namaOrangTua = namaOrangTuaController.text;
+                            String alamatOrtu = alamatortuController.text;
+                            String pekerjaanortu = pekerjaanController.text;
 
-                          Map<String, dynamic> data = {
-                            'id_layanan': 1,
-                            'tgl_pengajuan':
-                                DateFormat('yyyy-MM-dd').format(DateTime.now()),
-                            'status': 'Diproses',
-                            'catatan': 'Menunggu verifikasi dokumen',
-                            'id_rt': null,
-                            'id_rw': null,
-                            'id_admin': null,
-                            'fields': [
-                              {'nama_field': 'Nama', 'value': nama},
-                              {
-                                'nama_field': 'Tempat Lahir',
-                                'value': tempatLahir
-                              },
-                              {
-                                'nama_field': 'Tanggal Lahir',
-                                'value': tanggalLahir
-                              },
-                              {
-                                'nama_field': 'Jenis Kelamin',
-                                'value': jenisKelamin
-                              },
-                              {'nama_field': 'Sekolah', 'value': sekolah},
-                              {'nama_field': 'Alamat', 'value': alamat},
-                              {
-                                'nama_field': 'Nama Orang Tua',
-                                'value': namaOrangTua
-                              },
-                              {
-                                'nama_field': 'Jenis Kelamin Orang Tua',
-                                'value': jenisKelaminOrtu
-                              },
-                              {'nama_field': 'Pekerjaan', 'value': pekerjaan},
-                              {
-                                'nama_field': 'Alamat Orang Tua',
-                                'value': alamatOrtu
-                              },
-                            ],
-                          };
+                            String jenisKelamin = _jenisKelamin;
+                            String jenisKelaminOrtu = _jenisKelaminOrangTua;
 
-                          _kirimDataPengajuan(data);
+                            String fullPathSPRT =
+                                "${ApiConfig.baseUrl}/storage/" + pathSPRT;
+                            String fullPathKtp =
+                                "${ApiConfig.baseUrl}/storage/" + pathKtp;
+
+                            Map<String, dynamic> data = {
+                              'id_layanan': 1,
+                              'tgl_pengajuan': DateFormat('yyyy-MM-dd')
+                                  .format(DateTime.now()),
+                              'status': 'Diproses',
+                              'catatan': 'Menunggu verifikasi dokumen',
+                              'id_rt': null,
+                              'id_admin': null,
+                              'fields': [
+                                {'nama_field': 'Nama', 'value': nama},
+                                {
+                                  'nama_field': 'Tempat Lahir',
+                                  'value': tempatLahir
+                                },
+                                {
+                                  'nama_field': 'Tanggal Lahir',
+                                  'value': tanggalLahir
+                                },
+                                {
+                                  'nama_field': 'Jenis Kelamin',
+                                  'value': jenisKelamin
+                                },
+                                {'nama_field': 'Sekolah', 'value': sekolah},
+                                {'nama_field': 'Alamat', 'value': alamat},
+                                {'nama_field': 'NIK', 'value': nik},
+                                {
+                                  'nama_field': 'Nama Orang Tua',
+                                  'value': namaOrangTua
+                                },
+                                {
+                                  'nama_field': 'Jenis Kelamin Orang Tua',
+                                  'value': jenisKelaminOrtu
+                                },
+                                {
+                                  'nama_field': 'Pekerjaan Orang Tua',
+                                  'value': pekerjaanortu
+                                },
+                                {
+                                  'nama_field': 'Alamat Orang Tua',
+                                  'value': alamatOrtu
+                                },
+                                {'nama_field': 'Foto KK', 'value': _fotoKKUrl},
+                                {
+                                  'nama_field': 'Foto KTP',
+                                  'value': fullPathKtp
+                                },
+                                {
+                                  'nama_field': 'Bukti verifikasi RT',
+                                  'value': fullPathSPRT
+                                },
+                              ],
+                            };
+
+                            _kirimDataPengajuan(data);
+                          } else {
+                            print('Gagal mendapatkan path file SPRT dan KTP');
+                          }
                         }
                       },
                       child: Text(
@@ -585,7 +744,7 @@ class _SuratKeteranganTidakMampuState2 extends State<SuratKeteranganTidakMampu2>
                       ),
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
+                          borderRadius: BorderRadius.circular(10),
                         ),
                         padding: EdgeInsets.symmetric(vertical: 10),
                         backgroundColor: Color.fromRGBO(29, 216, 163, 80),

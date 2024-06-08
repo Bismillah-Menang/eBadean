@@ -13,6 +13,7 @@ class Layanan extends StatefulWidget {
 
 class _LayananPageState extends State<Layanan> {
   late Future<LayananList> _layananListFuture;
+  TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -30,6 +31,30 @@ class _LayananPageState extends State<Layanan> {
       return layananList;
     } else {
       throw Exception('Failed to load data');
+    }
+  }
+
+  IconData getIconForLayanan(String namaLayanan) {
+    final lowercaseNamaLayanan = namaLayanan.toLowerCase().trim();
+    switch (lowercaseNamaLayanan) {
+      case 'surat tidak mampu':
+        return Icons.money_off;
+      case 'surat izin usaha':
+        return Icons.business_center;
+      case 'surat domisili':
+        return Icons.home_work;
+      case 'akta kelahiran':
+        return Icons.child_care;
+      case 'akta kematian':
+        return Icons.airline_seat_flat;
+      case 'kelakuan baik':
+        return Icons.thumb_up;
+      case 'surat nikah':
+        return Icons.family_restroom;
+      case 'harga tanah':
+        return Icons.attach_money;
+      default:
+        return Icons.insert_drive_file;
     }
   }
 
@@ -52,6 +77,8 @@ class _LayananPageState extends State<Layanan> {
                 return Center(child: Text('Error: ${snapshot.error}'));
               } else {
                 final layananList = snapshot.data!;
+                final filteredBeritaList =
+                    layananList.filterByJudul(_searchController.text);
                 return SingleChildScrollView(
                   child: Padding(
                     padding: EdgeInsets.only(
@@ -82,6 +109,10 @@ class _LayananPageState extends State<Layanan> {
                             borderRadius: BorderRadius.circular(20.0),
                           ),
                           child: TextField(
+                            controller: _searchController,
+                            onChanged: (value) {
+                              setState(() {});
+                            },
                             decoration: InputDecoration(
                               hintText: 'Cari Surat',
                               hintStyle: TextStyle(
@@ -102,9 +133,9 @@ class _LayananPageState extends State<Layanan> {
                         ListView.builder(
                           shrinkWrap: true,
                           physics: NeverScrollableScrollPhysics(),
-                          itemCount: layananList.data?.length,
+                          itemCount: filteredBeritaList.length,
                           itemBuilder: (context, index) {
-                            final layanan = layananList.data![index];
+                            final layanan = filteredBeritaList[index];
                             return Padding(
                               padding: EdgeInsets.only(bottom: 20.0),
                               child: InkWell(
@@ -147,7 +178,8 @@ class _LayananPageState extends State<Layanan> {
                                               backgroundColor:
                                                   Color(0xFFEBF0FF),
                                               child: Icon(
-                                                Icons.insert_drive_file,
+                                                getIconForLayanan(
+                                                    layanan.nama_layanan),
                                                 color: Color(0xFF0046F8),
                                               ),
                                             ),

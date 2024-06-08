@@ -31,4 +31,12 @@ class LayananList {
   factory LayananList.fromJson(Map<String, dynamic> json) =>
       _$LayananListFromJson(json);
   Map<String, dynamic> toJson() => _$LayananListToJson(this);
+
+  List<Layanan> filterByJudul(String query) {
+    return data
+            ?.where((layanan) =>
+                layanan.nama_layanan.toLowerCase().contains(query.toLowerCase()))
+            ?.toList() ??
+        [];
+  }
 }

@@ -45,6 +45,30 @@ class _HomeState extends State<Home> {
     }
   }
 
+  IconData getIconForLayanan(String namaLayanan) {
+    final lowercaseNamaLayanan = namaLayanan.toLowerCase().trim();
+    switch (lowercaseNamaLayanan) {
+      case 'surat tidak mampu':
+        return Icons.money_off;
+      case 'surat izin usaha':
+        return Icons.business_center;
+      case 'surat domisili':
+        return Icons.home_work;
+      case 'akta kelahiran':
+        return Icons.child_care;
+      case 'akta kematian':
+        return Icons.airline_seat_flat;
+      case 'kelakuan baik':
+        return Icons.thumb_up;
+      case 'surat nikah':
+        return Icons.family_restroom;
+      case 'harga tanah':
+        return Icons.attach_money;
+      default:
+        return Icons.insert_drive_file;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -192,7 +216,8 @@ class _HomeState extends State<Home> {
                                               'No matching route for ${layanan.nama_layanan}');
                                         }
                                       },
-                                      icon: Icon(Icons.insert_drive_file,
+                                      icon: Icon(getIconForLayanan(
+                                                    layanan.nama_layanan),
                                           size: 30.0, color: Color(0xFF0046F8)),
                                       color: Color(0xFFEBF0FF),
                                       label: layanan.nama_layanan,
@@ -263,6 +288,7 @@ class _HomeState extends State<Home> {
                                           judul: berita.judul_berita,
                                           tgl: berita.tgl_berita,
                                           isi: berita.isi_berita,
+                                          sumber: berita.sumber,
                                           foto: berita.foto_berita,
                                         ),
                                       ),
