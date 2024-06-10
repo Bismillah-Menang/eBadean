@@ -47,13 +47,14 @@ class LupasPageState extends State<Lupas> {
       ..from = Address('badeanassistance@gmail.com', 'Badean Assistance')
       ..recipients.add(recipientEmail)
       ..subject = 'Kode OTP untuk aplikasi E-Badean'
-      ..text = '$verificationCode adalah kode verifikasi Anda. Demi keamanan, jangan bagikan kode ini.';
+      ..text =
+          '$verificationCode adalah kode verifikasi Anda. Demi keamanan, jangan bagikan kode ini.';
 
     try {
       final sendReport = await send(message, smtpServer);
       print('Message sent: ' + sendReport.toString());
       setState(() {
-        generatedOTP = verificationCode; 
+        generatedOTP = verificationCode;
       });
     } catch (e) {
       print('Error sending email: $e');
@@ -74,22 +75,20 @@ class LupasPageState extends State<Lupas> {
 
       if (response.statusCode == 200) {
         print('Password updated successfully');
-        showDialog(
+        AwesomeDialog(
           context: context,
-          builder: (context) => AlertDialog(
-            title: Text("Notifikasi"),
-            content: Text("Password berhasil diperbarui"),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  Navigator.pushNamed(context, '/login');
-                },
-                child: Text('OK'),
-              ),
-            ],
-          ),
-        );
+          dialogType: DialogType.success,
+          animType: AnimType.bottomSlide,
+          title: 'Berhasil',
+          titleTextStyle: TextStyle(
+              fontFamily: 'Poppins', fontSize: 18, fontWeight: FontWeight.bold),
+          desc: 'Password anda berhasil diubah!',
+          descTextStyle: TextStyle(fontFamily: 'Poppins'),
+          btnOkText: 'OK',
+          btnOkOnPress: () {
+            Navigator.pushNamed(context, '/login');
+          },
+        )..show();
       } else {
         print('Failed to update password');
       }

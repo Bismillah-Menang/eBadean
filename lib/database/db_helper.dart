@@ -42,8 +42,8 @@ class DBHelper {
         tanggal_lahir TEXT,
         kebangsaan TEXT,
         pekerjaan TEXT,
-        status_nikah TEXT,
         nik TEXT,
+        agama TEXT,
         foto_kk TEXT,
         foto_profil TEXT,
         foto_ktp TEXT,
@@ -153,8 +153,8 @@ class DBHelper {
             'tanggal_lahir': user.penduduk!.tanggalLahir,
             'kebangsaan': user.penduduk!.kebangsaan,
             'pekerjaan': user.penduduk!.pekerjaan,
-            'status_nikah': user.penduduk!.statusNikah,
             'nik': user.penduduk!.nik,
+            'agama': user.penduduk!.agama,
           };
 
           if (user.penduduk!.fotoKk != null) {
@@ -280,8 +280,8 @@ class DBHelper {
       'tanggal_lahir': pendudukData['tanggal_lahir'],
       'kebangsaan': pendudukData['kebangsaan'],
       'pekerjaan': pendudukData['pekerjaan'],
-      'status_nikah': pendudukData['status_nikah'],
       'nik': pendudukData['nik'],
+      'agama': pendudukData['agama'],
       'foto_profil': pendudukData['foto_profil'],
       'foto_kk': pendudukData['foto_kk'],
       'jenis_kelamin': pendudukData['jenis_kelamin'],

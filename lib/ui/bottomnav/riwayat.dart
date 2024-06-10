@@ -1,7 +1,12 @@
+import 'dart:io';
+import 'dart:convert';
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:e_badean/ip.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:path/path.dart' as path;
+import 'package:dio/dio.dart';
 import 'package:e_badean/models/riwayat.dart';
 import 'package:e_badean/models/user.dart';
 import 'package:e_badean/database/db_helper.dart';
@@ -14,6 +19,10 @@ class RiwayatPage extends StatefulWidget {
 
 class _RiwayatPageState extends State<RiwayatPage> {
   late Future<List<Riwayat>> _riwayatFuture;
+
+  bool _isExpanded = false;
+  bool _isDownloading = false;
+  String _progress = "";
 
   @override
   void initState() {
@@ -54,6 +63,100 @@ class _RiwayatPageState extends State<RiwayatPage> {
     } catch (error) {
       print('Error fetching riwayat: $error');
       return [];
+    }
+  }
+
+  Future<void> _downloadFile(String url) async {
+    setState(() {
+      _isDownloading = true;
+      _progress = "0%";
+    });
+
+    try {
+      final fileName = path.basename(url);
+      String directory = '/storage/emulated/0/Download/Ebadean';
+
+      final String filePath = '$directory/$fileName';
+
+      final dio = Dio();
+      await dio.download(url, filePath, onReceiveProgress: (received, total) {
+        if (total != -1) {
+          setState(() {
+            _progress = (received / total * 100).toStringAsFixed(0) + "%";
+          });
+        }
+      });
+
+      setState(() {
+        _isDownloading = false;
+        _progress = "Download completed!";
+      });
+
+      Fluttertoast.showToast(
+          msg: "Download completed: ${filePath}",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 5,
+          backgroundColor: Colors.green,
+          textColor: Colors.white,
+          fontSize: 16.0);
+    } catch (e) {
+      setState(() {
+        _isDownloading = false;
+        _progress = "Download failed!";
+      });
+
+      Fluttertoast.showToast(
+          msg: "Download failed!",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0);
+    }
+  }
+
+  Future<void> _deletePengajuan(int id) async {
+    try {
+      final url = '${ApiConfig.baseUrl}/api/pengajuan/$id';
+      print('Deleting pengajuan at URL: $url');
+
+      final response = await http.delete(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        setState(() {
+          _riwayatFuture = fetchRiwayat();
+        });
+        Fluttertoast.showToast(
+            msg: "Pengajuan berhasil dihapus",
+            toastLength: Toast.LENGTH_LONG,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.green,
+            textColor: Colors.white,
+            fontSize: 16.0);
+      } else {
+        print('Failed to delete pengajuan: ${response.body}');
+        Fluttertoast.showToast(
+            msg: "Gagal menghapus pengajuan",
+            toastLength: Toast.LENGTH_LONG,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0);
+      }
+    } catch (e) {
+      print('Exception deleting pengajuan: $e');
+      Fluttertoast.showToast(
+          msg: "Gagal menghapus pengajuan: $e",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0);
     }
   }
 
@@ -117,15 +220,13 @@ class _RiwayatPageState extends State<RiwayatPage> {
                         return Center(child: Text('Error: ${snapshot.error}'));
                       } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                         return Center(
-                          child: Text(
-                            'Tidak ada riwayat',
-                            style: TextStyle(
-                              fontSize: 18.0,
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w600,
-                              color: Colors.grey[600],
-                            ),
-                          ),
+                          child: Text('Tidak ada riwayat',
+                              style: TextStyle(
+                                fontSize: 18.0,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey[600],
+                              )),
                         );
                       } else {
                         return ListView.builder(
@@ -134,7 +235,13 @@ class _RiwayatPageState extends State<RiwayatPage> {
                           itemCount: snapshot.data!.length,
                           itemBuilder: (context, index) {
                             final riwayat = snapshot.data![index];
-                            return RiwayatItem(riwayat: riwayat);
+                            return RiwayatItem(
+                              riwayat: riwayat,
+                              onDownloadFile: _downloadFile,
+                              onDelete: _deletePengajuan,
+                              isDownloading: _isDownloading,
+                              progress: _progress,
+                            );
                           },
                         );
                       }
@@ -152,8 +259,19 @@ class _RiwayatPageState extends State<RiwayatPage> {
 
 class RiwayatItem extends StatefulWidget {
   final Riwayat riwayat;
+  final Future<void> Function(String) onDownloadFile;
+  final Future<void> Function(int) onDelete;
+  final bool isDownloading;
+  final String progress;
 
-  const RiwayatItem({Key? key, required this.riwayat}) : super(key: key);
+  const RiwayatItem({
+    Key? key,
+    required this.riwayat,
+    required this.onDownloadFile,
+    required this.onDelete,
+    required this.isDownloading,
+    required this.progress,
+  }) : super(key: key);
 
   @override
   _RiwayatItemState createState() => _RiwayatItemState();
@@ -237,7 +355,7 @@ class _RiwayatItemState extends State<RiwayatItem> {
                                 },
                                 child: AnimatedContainer(
                                   duration: Duration(milliseconds: 300),
-                                  width: _isExpanded ? 75.0 : 75.0,
+                                  width: 75.0,
                                   child: Icon(
                                     _isExpanded
                                         ? Icons.expand_less
@@ -253,8 +371,147 @@ class _RiwayatItemState extends State<RiwayatItem> {
                       ),
                     ],
                   ),
-                  if (_isExpanded)
+                  if (_isExpanded) ...[
                     ProsesPengajuan(status: widget.riwayat.status),
+                    if (widget.riwayat.fileSuratPath != null) ...[
+                      SizedBox(height: 10.0),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (widget.riwayat.status == 'Diproses')
+                            Center(
+                              child: CircleAvatar(
+                                radius: 20.0,
+                                backgroundColor:
+                                    Color.fromARGB(255, 255, 202, 197),
+                                child: IconButton(
+                                  icon: Icon(Icons.delete,
+                                      color: Color.fromARGB(255, 255, 17, 0)),
+                                  onPressed: () {
+                                    AwesomeDialog(
+                                      context: context,
+                                      dialogType: DialogType.error,
+                                      animType: AnimType.bottomSlide,
+                                      titleTextStyle: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold),
+                                      title: 'Konfirmasi',
+                                      desc:
+                                          'Apakah Anda yakin yakin ingin membatalkan pengajuan ?',
+                                      descTextStyle:
+                                          TextStyle(fontFamily: 'Poppins'),
+                                      btnOkText: 'Ya',
+                                      btnCancelText: 'Tidak',
+                                      btnOkOnPress: () {
+                                        widget.onDelete(widget.riwayat.id);
+                                      },
+                                      btnCancelOnPress: () {},
+                                      btnOkColor:
+                                          Color.fromRGBO(29, 216, 163, 80),
+                                      btnCancelColor: Color(0xFFF90606),
+                                    )..show();
+                                  },
+                                ),
+                              ),
+                            ),
+                          if (widget.riwayat.status == 'Disetujui' ||
+                              widget.riwayat.status == 'Diproses')
+                            if (widget.riwayat.status == 'Disetujui')
+                              Center(
+                                child: CircleAvatar(
+                                  radius: 20.0,
+                                  backgroundColor:
+                                      Color.fromRGBO(29, 216, 163, 1),
+                                  child: IconButton(
+                                    icon: Icon(Icons.download,
+                                        color: Colors.white),
+                                    onPressed: () {
+                                      widget.onDownloadFile(
+                                        widget.riwayat.fileSuratPath!,
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                        ],
+                      ),
+                      if (widget.isDownloading)
+                        Text(
+                          'Downloading... ${widget.progress}',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 14.0,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue,
+                          ),
+                        ),
+                    ],
+                    if (widget.riwayat.fileSuratPath == null) ...[
+                      SizedBox(height: 10.0),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (widget.riwayat.status == 'Diproses')
+                            Center(
+                              child: CircleAvatar(
+                                radius: 20.0,
+                                backgroundColor:
+                                    Color.fromARGB(255, 255, 202, 197),
+                                child: IconButton(
+                                  icon: Icon(Icons.delete,
+                                      color: Color.fromARGB(255, 255, 17, 0)),
+                                  onPressed: () {
+                                    AwesomeDialog(
+                                      context: context,
+                                      dialogType: DialogType.error,
+                                      animType: AnimType.bottomSlide,
+                                      titleTextStyle: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold),
+                                      title: 'Konfirmasi',
+                                      desc:
+                                          'Apakah Anda yakin yakin ingin membatalkan pengajuan ?',
+                                      descTextStyle:
+                                          TextStyle(fontFamily: 'Poppins'),
+                                      btnOkText: 'Ya',
+                                      btnCancelText: 'Tidak',
+                                      btnOkOnPress: () {
+                                        widget.onDelete(widget.riwayat.id);
+                                      },
+                                      btnCancelOnPress: () {},
+                                      btnOkColor:
+                                          Color.fromRGBO(29, 216, 163, 80),
+                                      btnCancelColor: Color(0xFFF90606),
+                                    )..show();
+                                  },
+                                ),
+                              ),
+                            ),
+                          if (widget.riwayat.status == 'Disetujui' ||
+                              widget.riwayat.status == 'Diproses')
+                            if (widget.riwayat.status == 'Disetujui')
+                              Center(
+                                child: CircleAvatar(
+                                  radius: 20.0,
+                                  backgroundColor:
+                                      Color.fromRGBO(29, 216, 163, 1),
+                                  child: IconButton(
+                                    icon: Icon(Icons.download,
+                                        color: Colors.white),
+                                    onPressed: () {
+                                      widget.onDownloadFile(
+                                        widget.riwayat.fileSuratPath!,
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                        ],
+                      ),
+                    ],
+                  ],
                 ],
               ),
             ),
@@ -299,7 +556,7 @@ class ProsesPengajuan extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Proses Pengajuan',
+                'Proses  Pengajuan',
                 style: TextStyle(
                   fontSize: 14.0,
                   fontFamily: 'Poppins',

@@ -29,7 +29,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   final TextEditingController tgllahirController = TextEditingController();
   final TextEditingController kebangsaanController = TextEditingController();
   final TextEditingController pekerjaanController = TextEditingController();
-  final TextEditingController statusnikahController = TextEditingController();
+  final TextEditingController agamaController = TextEditingController();
   final TextEditingController nikController = TextEditingController();
 
   String? _selectedGender;
@@ -315,9 +315,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
               ),
               SizedBox(height: 20),
               TextFormField(
-                controller: statusnikahController,
+                controller: agamaController,
                 decoration: InputDecoration(
-                  labelText: 'Masukkan status pernikahan',
+                  labelText: 'Agama',
                   prefixIcon: Icon(Icons.favorite),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),
@@ -333,7 +333,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 ),
                 validator: (value) {
                   if (value!.isEmpty) {
-                    return 'Status pernikahan harus diisi';
+                    return 'Agaam harus diisi';
                   }
                   return null;
                 },
@@ -471,7 +471,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             tgllahirController.text = user.penduduk?.tanggalLahir ?? '';
             kebangsaanController.text = user.penduduk?.kebangsaan ?? '';
             pekerjaanController.text = user.penduduk?.pekerjaan ?? '';
-            statusnikahController.text = user.penduduk?.statusNikah ?? '';
+            agamaController.text = user.penduduk?.agama ?? '';
             nikController.text = user.penduduk?.nik ?? '';
             _selectedGender = user.penduduk?.jenisKelamin;
             _fotoKKUrl = user.penduduk?.fotoKk;
@@ -547,7 +547,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
               'tanggal_lahir': tgllahirController.text,
               'kebangsaan': kebangsaanController.text,
               'pekerjaan': pekerjaanController.text,
-              'status_nikah': statusnikahController.text,
+              'agama': agamaController.text,
               'nik': nikController.text,
             }),
           );
@@ -576,7 +576,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 tanggalLahir: tgllahirController.text,
                 kebangsaan: kebangsaanController.text,
                 pekerjaan: pekerjaanController.text,
-                statusNikah: statusnikahController.text,
+                agama: agamaController.text,
                 nik: nikController.text,
               ),
             );

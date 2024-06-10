@@ -41,8 +41,8 @@ class Penduduk {
   final String? tanggalLahir;
   final String? kebangsaan;
   final String? pekerjaan;
-  final String? statusNikah;
   final String? nik;
+  final String? agama;
   final String? fotoProfil;
   final String? fotoKk;
   final String? fotoKtp;
@@ -58,8 +58,8 @@ class Penduduk {
     this.tanggalLahir,
     this.kebangsaan,
     this.pekerjaan,
-    this.statusNikah,
     this.nik,
+    this.agama,
     this.fotoKk, 
     this.fotoProfil, 
     this.fotoKtp, 
@@ -77,8 +77,8 @@ class Penduduk {
       tanggalLahir: json['tanggal_lahir'],
       kebangsaan: json['kebangsaan'],
       pekerjaan: json['pekerjaan'],
-      statusNikah: json['status_nikah'],
       nik: json['nik'],
+      agama: json['agama'],
       fotoKk: json['foto_kk'], 
       fotoProfil: json['foto_profil'], 
       fotoKtp: json['foto_ktp'],
@@ -97,8 +97,8 @@ class Penduduk {
       'tanggal_lahir': tanggalLahir,
       'kebangsaan': kebangsaan,
       'pekerjaan': pekerjaan,
-      'status_nikah': statusNikah,
       'nik': nik,
+      'agama': agama,
       'foto_kk': fotoKk,
       'foto_profil': fotoProfil,
       'foto_ktp': fotoKtp,

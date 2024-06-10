@@ -201,7 +201,8 @@ class _SuratKeteranganTidakMampuState extends State<SuratKeteranganTidakMampu> {
                   fontSize: 18,
                   fontWeight: FontWeight.bold),
               title: 'Gagal',
-              desc: 'Gagal mengirim formulir, anda masih memiliki pengajuan yang masih Diproses.',
+              desc:
+                  'Gagal mengirim formulir, anda masih memiliki pengajuan yang masih Diproses.',
               descTextStyle: TextStyle(fontFamily: 'Poppins'),
               btnOkOnPress: () {},
               btnOkColor: Colors.red,
@@ -583,6 +584,33 @@ class _SuratKeteranganTidakMampuState extends State<SuratKeteranganTidakMampu> {
                       ),
                     ),
                     SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: ()  {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PengajuanOrangLain(),
+                          ),
+                        );
+                      },
+                      child: Text(
+                        "PENGAJUAN UNTUK ORANG LAIN",
+                        style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Poppins'),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        padding: EdgeInsets.symmetric(vertical: 10),
+                        backgroundColor: Color(0xFF1548AD),
+                        minimumSize: Size(double.infinity, 0),
+                      ),
+                    ),
+                    SizedBox(height: 5.0),
                     ElevatedButton(
                       onPressed: () async {
                         if (_formKey.currentState!.validate()) {
