@@ -217,9 +217,8 @@ class _RegisterState extends State<Register> {
                 ),
                 SizedBox(height: 20.0),
                 ElevatedButton(
-                  onPressed: () {
-                    _registerUser;
-                  },
+                  onPressed: 
+                    _registerUser,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFF1548AD),
                     shape: RoundedRectangleBorder(
