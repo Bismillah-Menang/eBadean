@@ -678,10 +678,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
       context: context,
       dialogType: DialogType.success,
       animType: AnimType.scale,
-      title: 'Profile Terbaharui',
-      desc: 'Berhasil memperbarui data profil',
+      title: 'Berhasil',
+      desc: 'Berhasil melakukan verifikasi data',
       btnOkOnPress: () {
-        Navigator.pop(context, true);
+        Navigator.pushNamed(context, '/bottomnav');
       },
     )..show();
   }

@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:e_badean/ip.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:e_badean/ui/detail/editprofil.dart';
 
 class Login extends StatefulWidget {
   @override
@@ -60,7 +61,7 @@ class LoginPageState extends State<Login> {
             responseData['status'] == true &&
             responseData['token'] != null) {
           print("Token berhasil didapatkan: ${responseData['token']}");
-          String token = responseData['token']; 
+          String token = responseData['token'];
 
           await DBHelper.saveToken(token);
 
@@ -74,8 +75,13 @@ class LoginPageState extends State<Login> {
           if (loggedInUser != null) {
             await DBHelper.saveUser(loggedInUser, token);
             await _saveToken(token);
-            _showSuccessDialog(
-                "Anda berhasil login.", loggedInUser, responseData['token']);
+            if (loggedInUser != null && _isUserProfileComplete(loggedInUser)) {
+              _showSuccessDialog2(
+                  "Anda berhasil login.", loggedInUser, responseData['token']);
+            } else {
+              _showSuccessDialog(
+                  "Anda berhasil login.", loggedInUser, responseData['token']);
+            }
           } else {
             _showErrorDialog("Gagal mendapatkan data pengguna atau penduduk.");
           }
@@ -98,17 +104,12 @@ class LoginPageState extends State<Login> {
     }
   }
 
-   Future<void> _printAllUsersFromSQLite() async {
+  Future<void> _printAllUsersFromSQLite() async {
     final allUsers = await DBHelper.getAllUsers();
     print("All users from SQLite:");
     allUsers.forEach((user) {
       print(user);
     });
-  }
-
-  Future<void> _saveEmailSharedPreferences(String email) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('email', email);
   }
 
   Future<void> _saveToken(String token) async {
@@ -151,6 +152,23 @@ class LoginPageState extends State<Login> {
     }
   }
 
+  bool _isUserProfileComplete(User user) {
+    return user.penduduk != null &&
+        user.penduduk!.namaLengkap!.isNotEmpty &&
+        user.email.isNotEmpty &&
+        user.penduduk!.noHp!.isNotEmpty &&
+        user.penduduk!.alamat!.isNotEmpty &&
+        user.penduduk!.tempatLahir!.isNotEmpty &&
+        user.penduduk!.tanggalLahir!.isNotEmpty &&
+        user.penduduk!.kebangsaan!.isNotEmpty &&
+        user.penduduk!.pekerjaan!.isNotEmpty &&
+        user.penduduk!.agama!.isNotEmpty &&
+        user.penduduk!.nik!.isNotEmpty &&
+        user.penduduk!.jenisKelamin != null &&
+        user.penduduk!.fotoKk != null &&
+        user.penduduk!.fotoKtp != null;
+  }
+
   void _handleLoginError(dynamic responseData, int statusCode) {
     if (statusCode == 401) {
       if (responseData['status'] == false) {
@@ -188,6 +206,28 @@ class LoginPageState extends State<Login> {
   }
 
   void _showSuccessDialog(String message, User user, String token) {
+    AwesomeDialog(
+      context: context,
+      dialogType: DialogType.success,
+      animType: AnimType.bottomSlide,
+      title: 'Login Berhasil',
+      titleTextStyle: TextStyle(
+          fontFamily: 'Poppins', fontSize: 18, fontWeight: FontWeight.bold),
+      desc: message,
+      descTextStyle: TextStyle(fontFamily: 'Poppins'),
+      btnOkText: 'OK',
+      btnOkOnPress: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => EditProfilePage(),
+          ),
+        );
+      },
+    )..show();
+  }
+
+  void _showSuccessDialog2(String message, User user, String token) {
     AwesomeDialog(
       context: context,
       dialogType: DialogType.success,
