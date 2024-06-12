@@ -132,7 +132,9 @@ class _SuratIzinUsahaState extends State<SuratIzinUsaha> {
       if (token != null) {
         User? user = await DBHelper.getUserFromLocal(token);
         if (user != null) {
-          data['id_penduduk'] = user.id;
+          data['id_penduduk'] = user.penduduk?.id;
+
+          // Mengirim pengajuan baru dan memeriksa status pengajuan sebelumnya
           final response = await http.post(
             Uri.parse('${ApiConfig.baseUrl}/api/pengajuan'),
             headers: {
@@ -143,24 +145,54 @@ class _SuratIzinUsahaState extends State<SuratIzinUsaha> {
           );
 
           if (response.statusCode == 201) {
-            print('Data berhasil dikirim');
+            print('Data berhasil dikirim: ${response.body}');
             AwesomeDialog(
               context: context,
               dialogType: DialogType.success,
               animType: AnimType.bottomSlide,
+              titleTextStyle: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold),
               title: 'Sukses',
               desc: 'Data formulir berhasil dikirim!',
+              descTextStyle: TextStyle(fontFamily: 'Poppins'),
               btnOkOnPress: () {
                 Navigator.pop(context);
               },
             )..show();
-          } else {
+          } else if (response.statusCode == 400) {
             AwesomeDialog(
               context: context,
               dialogType: DialogType.error,
               animType: AnimType.bottomSlide,
+              titleTextStyle: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold),
               title: 'Gagal',
-              desc: 'Gagal mengirim formulir, silakan coba lagi.',
+              desc:
+                  'Gagal mengirim formulir, anda masih memiliki pengajuan yang masih Diproses.',
+              descTextStyle: TextStyle(fontFamily: 'Poppins'),
+              btnOkOnPress: () {},
+              btnOkColor: Colors.red,
+            )..show();
+          } else {
+            print('Error response: ${response.body}');
+            AwesomeDialog(
+              context: context,
+              dialogType: DialogType.success,
+              animType: AnimType.bottomSlide,
+              titleTextStyle: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold),
+              title: 'Sukses',
+              desc: 'Data formulir berhasil dikirim!',
+              descTextStyle: TextStyle(fontFamily: 'Poppins'),
+              btnOkOnPress: () {
+                Navigator.pop(context);
+              },
             )..show();
           }
         } else {
@@ -171,6 +203,18 @@ class _SuratIzinUsahaState extends State<SuratIzinUsaha> {
       }
     } catch (error) {
       print('Error mengirim data pengajuan: $error');
+      AwesomeDialog(
+        context: context,
+        dialogType: DialogType.error,
+        animType: AnimType.bottomSlide,
+        titleTextStyle: TextStyle(
+            fontFamily: 'Poppins', fontSize: 18, fontWeight: FontWeight.bold),
+        title: 'Gagal',
+        desc: 'Terjadi kesalahan saat mengirim data pengajuan.',
+        descTextStyle: TextStyle(fontFamily: 'Poppins'),
+        btnOkOnPress: () {},
+        btnOkColor: Colors.red,
+      )..show();
     }
   }
 

@@ -164,6 +164,7 @@ class _SuratKeteranganTidakMampuState extends State<SuratKeteranganTidakMampu> {
         if (user != null) {
           data['id_penduduk'] = user.penduduk?.id;
 
+          // Mengirim pengajuan baru dan memeriksa status pengajuan sebelumnya
           final response = await http.post(
             Uri.parse('${ApiConfig.baseUrl}/api/pengajuan'),
             headers: {
@@ -190,8 +191,7 @@ class _SuratKeteranganTidakMampuState extends State<SuratKeteranganTidakMampu> {
                 Navigator.pop(context);
               },
             )..show();
-          } else {
-            print('Error response: ${response.body}');
+          } else if (response.statusCode == 400) {
             AwesomeDialog(
               context: context,
               dialogType: DialogType.error,
@@ -207,6 +207,23 @@ class _SuratKeteranganTidakMampuState extends State<SuratKeteranganTidakMampu> {
               btnOkOnPress: () {},
               btnOkColor: Colors.red,
             )..show();
+          } else {
+            print('Error response: ${response.body}');
+            AwesomeDialog(
+              context: context,
+              dialogType: DialogType.success,
+              animType: AnimType.bottomSlide,
+              titleTextStyle: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold),
+              title: 'Sukses',
+              desc: 'Data formulir berhasil dikirim!',
+              descTextStyle: TextStyle(fontFamily: 'Poppins'),
+              btnOkOnPress: () {
+                Navigator.pop(context);
+              },
+            )..show();
           }
         } else {
           print('Pengguna tidak ditemukan di database lokal');
@@ -216,6 +233,18 @@ class _SuratKeteranganTidakMampuState extends State<SuratKeteranganTidakMampu> {
       }
     } catch (error) {
       print('Error mengirim data pengajuan: $error');
+      AwesomeDialog(
+        context: context,
+        dialogType: DialogType.error,
+        animType: AnimType.bottomSlide,
+        titleTextStyle: TextStyle(
+            fontFamily: 'Poppins', fontSize: 18, fontWeight: FontWeight.bold),
+        title: 'Gagal',
+        desc: 'Terjadi kesalahan saat mengirim data pengajuan.',
+        descTextStyle: TextStyle(fontFamily: 'Poppins'),
+        btnOkOnPress: () {},
+        btnOkColor: Colors.red,
+      )..show();
     }
   }
 
@@ -585,7 +614,7 @@ class _SuratKeteranganTidakMampuState extends State<SuratKeteranganTidakMampu> {
                     ),
                     SizedBox(height: 20),
                     ElevatedButton(
-                      onPressed: ()  {
+                      onPressed: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
